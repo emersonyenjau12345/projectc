@@ -14,6 +14,7 @@ import ForgotPasswordScreen from "./components/ForgotPasswordScreen";
 import WorkLoginScreen from "./components/WorkLoginScreen";
 import ChatScreen from "./components/ChatScreen";
 import VillageChating from './components/VillageChating';
+import EditinPihakKerja from "./components/EditinPihakKerja";
 
 const Stack = createStackNavigator();
 
@@ -29,6 +30,7 @@ export default function App() {
         <Stack.Screen name="InputDataScreen" component={InputDataScreen} />
         <Stack.Screen name="ChatScreen" component={ChatScreen} />
         <Stack.Screen name="VillageChating" component={VillageChating} />
+        <Stack.Screen name="EditinPihakKerja" component={EditinPihakKerja} />
 
         <Stack.Screen
           name="ChangePasswordScreen"

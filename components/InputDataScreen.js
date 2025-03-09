@@ -7,13 +7,16 @@ import {
   StyleSheet,
   TextInput,
   Alert,
+  ScrollView,
 } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { auth, db } from "../firebaseConfig";
 import { doc, setDoc, getDoc } from "firebase/firestore";
+import { useWindowDimensions } from "react-native";
 
 const InputDataScreen = () => {
+  const { width, height } = useWindowDimensions();
   const [image, setImage] = useState(null);
   const [description, setDescription] = useState("");
   const [userData, setUserData] = useState(null);
@@ -103,43 +106,53 @@ const InputDataScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>{user?.email || "User Tidak Ditemukan"}</Text>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerText}>{user?.email || "User Tidak Ditemukan"}</Text>
+        </View>
+
+        <TouchableOpacity style={styles.uploadBox} onPress={pickImage}>
+          {image ? (
+            <Image source={{ uri: image }} style={styles.uploadedImage} />
+          ) : (
+            <>
+              <FontAwesome5 name="cloud-upload-alt" size={50} color="#555" />
+              <Text style={styles.uploadText}>Upload Gambar</Text>
+            </>
+          )}
+        </TouchableOpacity>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Tambahkan deskripsi"
+          placeholderTextColor="#888"
+          value={description}
+          onChangeText={setDescription}
+        />
+
+        <TouchableOpacity style={styles.uploadButton} onPress={uploadToCloudinary}>
+          <Text style={styles.uploadButtonText}>Upload</Text>
+        </TouchableOpacity>
       </View>
-
-      <TouchableOpacity style={styles.uploadBox} onPress={pickImage}>
-        {image ? (
-          <Image source={{ uri: image }} style={styles.uploadedImage} />
-        ) : (
-          <>
-            <FontAwesome5 name="cloud-upload-alt" size={50} color="#555" />
-            <Text style={styles.uploadText}>Upload Gambar</Text>
-          </>
-        )}
-      </TouchableOpacity>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Tambahkan deskripsi"
-        placeholderTextColor="#888"
-        value={description}
-        onChangeText={setDescription}
-      />
-
-      <TouchableOpacity style={styles.uploadButton} onPress={uploadToCloudinary}>
-        <Text style={styles.uploadButtonText}>Upload</Text>
-      </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 20, // Menyesuaikan posisi agar turun sedikit
+  },
   container: { 
-    flex: 1, 
+    width: "90%", 
     padding: 20, 
     backgroundColor: "#f5f5f5", 
     alignItems: "center",
+    borderRadius: 10,
+    elevation: 3, // Bayangan agar lebih elegan
   },
   header: { 
     marginBottom: 20, 
@@ -147,20 +160,20 @@ const styles = StyleSheet.create({
     alignItems: "center" 
   },
   headerText: { 
-    fontSize: 18, 
+    fontSize: 20, 
     fontWeight: "bold", 
     color: "#333" 
   },
   uploadBox: { 
     width: "100%", 
-    height: 180, 
+    height: 200, 
     backgroundColor: "#e0e0e0", 
     justifyContent: "center", 
     alignItems: "center", 
     borderRadius: 10, 
     borderWidth: 1, 
     borderColor: "#ccc",
-    marginBottom: 15,
+    marginBottom: 20,
   },
   uploadText: { 
     marginTop: 10, 
@@ -171,22 +184,23 @@ const styles = StyleSheet.create({
   uploadedImage: { 
     width: "100%", 
     height: "100%", 
-    borderRadius: 10 
+    borderRadius: 10,
+    resizeMode: "contain", // Agar gambar tidak terpotong
   },
   input: { 
     width: "100%",
-    height: 45, 
+    height: 50, 
     borderColor: "#ddd", 
     borderWidth: 1, 
     borderRadius: 8, 
     paddingHorizontal: 15, 
     backgroundColor: "#fff",
     fontSize: 16,
-    marginBottom: 10,
+    marginBottom: 15,
   },
   uploadButton: { 
     backgroundColor: "#28a745", 
-    padding: 12, 
+    paddingVertical: 14, 
     borderRadius: 8, 
     alignItems: "center",
     width: "100%",

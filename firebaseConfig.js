@@ -2,13 +2,13 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { 
   getAuth, 
   initializeAuth, 
-  indexedDBLocalPersistence, 
+  inMemoryPersistence, 
   browserLocalPersistence, 
   setPersistence 
 } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getDatabase } from "firebase/database";
-import { getMessaging, getToken, onMessage } from "firebase/messaging"; // Untuk Web Push Notifications
+import { getMessaging, getToken, onMessage } from "firebase/messaging"; 
 import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 
 const firebaseConfig = {
@@ -27,18 +27,17 @@ const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 // Deteksi apakah aplikasi berjalan di React Native atau Web
 const isReactNative = typeof navigator !== "undefined" && navigator.product === "ReactNative";
 
-// Inisialisasi Firebase Auth tanpa error
+// Inisialisasi Firebase Auth
 let auth;
 if (isReactNative) {
-  // Firebase Auth di React Native tidak mendukung browserLocalPersistence
   try {
-    auth = initializeAuth(app, { persistence: indexedDBLocalPersistence });
+    auth = initializeAuth(app, { persistence: inMemoryPersistence });
   } catch (error) {
-    auth = getAuth(app); // Jika sudah diinisialisasi, ambil instance yang ada
+    auth = getAuth(app);
   }
 } else {
   auth = getAuth(app);
-  setPersistence(auth, browserLocalPersistence).catch(console.error); // Simpan sesi login di Web
+  setPersistence(auth, browserLocalPersistence).catch(console.error);
 }
 
 // Inisialisasi Firestore & Realtime Database

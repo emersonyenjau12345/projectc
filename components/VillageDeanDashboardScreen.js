@@ -196,6 +196,8 @@ const VillageDeanDashboardScreen = () => {
       <Text style={styles.headerCell}>Seating</Text>
       <Text style={styles.headerCell}>Tempat Kerja</Text>
       <Text style={styles.headerCell}>Poin</Text>
+      <Text style={styles.headerCell}>Keterangan</Text>
+
     </View>
 
     {/* Data Tabel */}
@@ -211,6 +213,8 @@ const VillageDeanDashboardScreen = () => {
           <Text style={styles.tableCell}>{item.Seating}</Text>
           <Text style={styles.tableCell}>{item.Tempat_Kerja}</Text>
           <Text style={styles.tableCell}>{item.Points}</Text>
+          <Text style={styles.tableCell}>{item.ImageApproved ? "Disetujui" : "Belum Disetujui"}</Text>
+
         </View>
       )}
     />
@@ -220,11 +224,15 @@ const VillageDeanDashboardScreen = () => {
   <View>
     {/* Keterangan Header Tabel */}
     <View style={styles.tableHeader}>
-      <Text style={styles.headerCell}>No</Text>
-      <Text style={styles.headerCell}>Nama</Text>
-      <Text style={styles.headerCell}>Poin</Text>
-      <Text style={styles.headerCell}>Aksi</Text>
-    </View>
+  <Text style={[styles.headerCell, { paddingHorizontal: 40 }]}>No</Text>
+  <Text style={[styles.headerCell, { paddingHorizontal: 10 }]}>Nama </Text>
+  <Text style={[styles.headerCell, { paddingHorizontal: 15 }]}>Nim</Text>
+  <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Jumlah Apsen</Text>
+  <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Jam Kerja</Text>
+  <Text style={[styles.headerCell, { paddingHorizontal: 10 }]}>Poin Mahasiswa</Text>
+  <Text style={[styles.headerCell, { paddingHorizontal: 10 }]}>Aksi</Text>
+</View>
+
 
     {/* Data Tabel */}
     <FlatList
@@ -236,6 +244,9 @@ const VillageDeanDashboardScreen = () => {
           <View style={styles.tableRow}>
             <Text style={styles.tableCell}>{item.No}</Text>
             <Text style={styles.tableCell}>{item.Name}</Text>
+            <Text style={styles.tableCell}>{item.Nim}</Text>
+            <Text style={styles.tableCell}>{item.Jumlah_Apsen}</Text>
+            <Text style={styles.tableCell}>{item.Jam}</Text>
             <Text style={styles.tableCell}>{points}</Text>
 
             <View style={styles.iconContainer}>
@@ -270,15 +281,16 @@ const VillageDeanDashboardScreen = () => {
   <View>
     {/* Keterangan Header Tabel */}
     <View style={styles.tableHeader}>
-      <Text style={styles.headerCell}>No</Text>
-      <Text style={styles.headerCell}>Nama</Text>
-      <Text style={styles.headerCell}>NIM</Text>
-      <Text style={styles.headerCell}>Regis</Text>
-      <Text style={styles.headerCell}>Seating</Text>
-      <Text style={styles.headerCell}>Tempat Kerja</Text>
-      <Text style={styles.headerCell}>Poin</Text>
-      <Text style={styles.headerCell}>Aksi</Text>
-    </View>
+  <Text style={[styles.headerCell, { flex: 1 }]}>No</Text>
+  <Text style={[styles.headerCell, { flex: 1 }]}>Nama</Text>
+  <Text style={[styles.headerCell, { flex: 1 }]}>NIM</Text>
+  <Text style={[styles.headerCell, { flex: 1.5 }]}>Regis</Text>
+  <Text style={[styles.headerCell, { flex: 1 }]}>Jumlah Apsen</Text>
+  <Text style={[styles.headerCell, { flex: 1.5 }]}>Jam Kerja</Text>
+  <Text style={[styles.headerCell, { flex: 1.5 }]}>Poin</Text>
+  <Text style={[styles.headerCell, { flex: 1.5 }]}>Aksi</Text>
+  </View>
+
 
     {/* Data Tabel */}
     <FlatList
@@ -290,14 +302,21 @@ const VillageDeanDashboardScreen = () => {
           <Text style={styles.tableCell}>{item.Name}</Text>
           <Text style={styles.tableCell}>{item.Nim}</Text>
           <Text style={styles.tableCell}>{item.Regis}</Text>
-          <Text style={styles.tableCell}>{item.Seating}</Text>
 
           <TextInput
             style={styles.input}
-            value={editedData[item.id]?.Tempat_Kerja ?? String(item.Tempat_Kerja)}
-            onChangeText={(text) => handleEdit(item.id, "Tempat_Kerja", text)}
+            value={editedData[item.id]?.Jumlah_Apsen ?? String(item.Jumlah_Apsen)}
+            onChangeText={(text) => handleEdit(item.id, "Jumlah_Apsen", text)}
             keyboardType="numeric"
-            placeholder="Tempat Kerja"
+            placeholder="Jumlah_Apsen"
+          />
+
+          <TextInput
+            style={styles.input}
+            value={editedData[item.id]?.Jam ?? String(item.Jam)}
+            onChangeText={(text) => handleEdit(item.id, "Jam", text)}
+            keyboardType="numeric"
+            placeholder="Jam Kerja"
           />
 
           <TextInput
@@ -377,7 +396,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     alignItems: "center",
     borderRadius: 8,
-    marginVertical: 4,
+    marginVertical: 5,
     paddingHorizontal: 10,
   },
   tableCell: { flex: 1, textAlign: "center", fontSize: 14, color: "#37474F" },

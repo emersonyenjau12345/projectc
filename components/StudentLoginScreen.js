@@ -25,9 +25,21 @@ const StudentLoginScreen = () => {
   const auth = getAuth();
   const firestore = getFirestore();
 
+  // Daftar email pihak kerja dan admin yang tidak boleh login
+  const blockedEmails = [
+    "s21810030@student.unklab.ac.id",
+    "s11810307@student.unklab.ac.id",
+  ];
+
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert("Error", "Email dan Password harus diisi!");
+      return;
+    }
+
+    // Cek apakah email masuk dalam daftar yang dilarang
+    if (blockedEmails.includes(email.toLowerCase())) {
+      Alert.alert("Login Failed", "Anda tidak memiliki akses ke sistem ini!");
       return;
     }
 
@@ -37,7 +49,7 @@ const StudentLoginScreen = () => {
       const user = userCredential.user;
 
       // Ambil data pengguna dari Firestore berdasarkan email
-      const usersRef = collection(firestore, "Users"); // Pastikan koleksi "Users" sesuai dengan Firestore
+      const usersRef = collection(firestore, "Users");
       const q = query(usersRef, where("Email", "==", email));
       const querySnapshot = await getDocs(q);
 
