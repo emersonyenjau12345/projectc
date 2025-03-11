@@ -49,8 +49,7 @@ const InputDataScreen = () => {
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
+      allowsEditing: false,
       quality: 1,
     });
     if (!result.canceled) {
@@ -144,7 +143,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 20, // Menyesuaikan posisi agar turun sedikit
+    paddingVertical: 20,
   },
   container: { 
     width: "90%", 
@@ -152,7 +151,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5", 
     alignItems: "center",
     borderRadius: 10,
-    elevation: 3, // Bayangan agar lebih elegan
+    elevation: 3, 
   },
   header: { 
     marginBottom: 20, 
@@ -185,7 +184,7 @@ const styles = StyleSheet.create({
     width: "100%", 
     height: "100%", 
     borderRadius: 10,
-    resizeMode: "contain", // Agar gambar tidak terpotong
+    resizeMode: "contain", 
   },
   input: { 
     width: "100%",

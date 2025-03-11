@@ -80,9 +80,24 @@ const VillageDeanDashboardScreen = () => {
 
   const approveImage = async (id) => {
     try {
+      // Cari user berdasarkan id di state users
+      const user = users.find((user) => user.id === id);
+  
+      if (!user) {
+        alert("Error: Pengguna tidak ditemukan!");
+        return;
+      }
+  
+      if (!user.imageUrl) {
+        alert("Error: Gambar belum tersedia!");
+        return;
+      }
+  
+      // Update Firestore
       const userRef = doc(db, "Users", id);
       await updateDoc(userRef, { ImageApproved: true });
   
+      // Perbarui state lokal
       setUsers(users.map(user =>
         user.id === id ? { ...user, ImageApproved: true } : user
       ));
@@ -93,6 +108,26 @@ const VillageDeanDashboardScreen = () => {
     }
   };
 
+  const approvePoints = async (id, points) => {
+    if (points >0) {
+      alert("Poin masih ada, tidak bisa disetujui!");
+      return;
+    }
+
+    try {
+      const userRef = doc(db, "Users", id);
+      await updateDoc(userRef, { Approved: true });
+
+      setUsers(users.map(user =>
+        user.id === id ? { ...user, Approved: true } : user
+      ));
+
+      alert("Points Approved!");
+    } catch (error) {
+      console.error("Error approving points:", error);
+    }
+  };
+  
   const handleSave = async (id) => {
     const updatedUser  = editedData[id];
     if (updatedUser ) {
@@ -113,26 +148,6 @@ const VillageDeanDashboardScreen = () => {
           Points: String(originalUser .Points),
         }
       });
-    }
-  };
-
-  const approvePoints = async (id, points) => {
-    if (points > 0) {
-      alert("Poin masih ada, tidak bisa disetujui!");
-      return;
-    }
-
-    try {
-      const userRef = doc(db, "Users", id);
-      await updateDoc(userRef, { Approved: true });
-
-      setUsers(users.map(user =>
-        user.id === id ? { ...user, Approved: true } : user
-      ));
-
-      alert("Points Approved!");
-    } catch (error) {
-      console.error("Error approving points:", error);
     }
   };
 
@@ -225,11 +240,10 @@ const VillageDeanDashboardScreen = () => {
     {/* Keterangan Header Tabel */}
     <View style={styles.tableHeader}>
   <Text style={[styles.headerCell, { paddingHorizontal: 40 }]}>No</Text>
-  <Text style={[styles.headerCell, { paddingHorizontal: 10 }]}>Nama </Text>
-  <Text style={[styles.headerCell, { paddingHorizontal: 15 }]}>Nim</Text>
-  <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Jumlah Apsen</Text>
+  <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Nama </Text>
+  <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Nim</Text>
   <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Jam Kerja</Text>
-  <Text style={[styles.headerCell, { paddingHorizontal: 10 }]}>Poin Mahasiswa</Text>
+  <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Poin Mahasiswa</Text>
   <Text style={[styles.headerCell, { paddingHorizontal: 10 }]}>Aksi</Text>
 </View>
 
@@ -245,7 +259,6 @@ const VillageDeanDashboardScreen = () => {
             <Text style={styles.tableCell}>{item.No}</Text>
             <Text style={styles.tableCell}>{item.Name}</Text>
             <Text style={styles.tableCell}>{item.Nim}</Text>
-            <Text style={styles.tableCell}>{item.Jumlah_Apsen}</Text>
             <Text style={styles.tableCell}>{item.Jam}</Text>
             <Text style={styles.tableCell}>{points}</Text>
 
@@ -281,11 +294,10 @@ const VillageDeanDashboardScreen = () => {
   <View>
     {/* Keterangan Header Tabel */}
     <View style={styles.tableHeader}>
-  <Text style={[styles.headerCell, { flex: 1 }]}>No</Text>
-  <Text style={[styles.headerCell, { flex: 1 }]}>Nama</Text>
-  <Text style={[styles.headerCell, { flex: 1 }]}>NIM</Text>
+  <Text style={[styles.headerCell, { flex: 1.5}]}>No</Text>
+  <Text style={[styles.headerCell, { flex: 1.5 }]}>Nama</Text>
+  <Text style={[styles.headerCell, { flex: 1.5 }]}>NIM</Text>
   <Text style={[styles.headerCell, { flex: 1.5 }]}>Regis</Text>
-  <Text style={[styles.headerCell, { flex: 1 }]}>Jumlah Apsen</Text>
   <Text style={[styles.headerCell, { flex: 1.5 }]}>Jam Kerja</Text>
   <Text style={[styles.headerCell, { flex: 1.5 }]}>Poin</Text>
   <Text style={[styles.headerCell, { flex: 1.5 }]}>Aksi</Text>
@@ -302,14 +314,6 @@ const VillageDeanDashboardScreen = () => {
           <Text style={styles.tableCell}>{item.Name}</Text>
           <Text style={styles.tableCell}>{item.Nim}</Text>
           <Text style={styles.tableCell}>{item.Regis}</Text>
-
-          <TextInput
-            style={styles.input}
-            value={editedData[item.id]?.Jumlah_Apsen ?? String(item.Jumlah_Apsen)}
-            onChangeText={(text) => handleEdit(item.id, "Jumlah_Apsen", text)}
-            keyboardType="numeric"
-            placeholder="Jumlah_Apsen"
-          />
 
           <TextInput
             style={styles.input}

@@ -43,12 +43,14 @@ const ViewAbsentScreen = () => {
             const user = docSnapshot.data();
             console.log("✅ User ditemukan:", user);
 
+            const imageApproved = user.ImageApproved || false;
+
             setProfile({
               name: user.Name || "Tidak Diketahui",
-              jumlah_absen: user.Jumlah_Apsen || "Tidak Diketahui",
-              total_poin: user.Points || "Tidak Diketahui",
-              total_jam_kerja: user.Jam || "Tidak Diketahui",
-              tempat_kerja: user.Tempat_Kerja || "Tidak Diketahui",
+              total_poin: imageApproved ? "" : user.Points || "Tidak Diketahui",  // Hapus tempat kerja jika disetujui
+              total_jam_kerja: imageApproved ? "" : user.Jam || "Tidak Diketahui", 
+              tempat_kerja: imageApproved ? "" : user.Tempat_Kerja || "Tidak Diketahui",
+              imageApproved,
             });
           });
         } else {
@@ -85,21 +87,40 @@ const ViewAbsentScreen = () => {
             <Text style={styles.errorText}>{error}</Text>
           ) : (
             <>
+
+              {/* Tampilkan Tempat Kerja hanya jika ImageApproved === false */}
+
+              {!profile.imageApproved && (
+                <View style={styles.dataBox}>
+                  <Text style={styles.dataLabel}>Toatal Jam Kerja</Text>
+                  <Text style={styles.dataValue}>{profile.total_jam_kerja}</Text>
+                </View>
+              )}
+
+              {!profile.imageApproved && (
+                <View style={styles.dataBox}>
+                  <Text style={styles.dataLabel}>Toatal Poin</Text>
+                  <Text style={styles.dataValue}>{profile.total_poin}</Text>
+                </View>
+              )}
+              {!profile.imageApproved && (
+                <View style={styles.dataBox}>
+                  <Text style={styles.dataLabel}>Tempat Kerja</Text>
+                  <Text style={styles.dataValue}>{profile.tempat_kerja}</Text>
+                </View>
+              )}
+
+              {/* Status Persetujuan Gambar */}
               <View style={styles.dataBox}>
-                <Text style={styles.dataLabel}>Jumlah Absen</Text>
-                <Text style={styles.dataValue}>{profile.jumlah_absen}</Text>
-              </View>
-              <View style={styles.dataBox}>
-                <Text style={styles.dataLabel}>Total Poin</Text>
-                <Text style={styles.dataValue}>{profile.total_poin}</Text>
-              </View>
-              <View style={styles.dataBox}>
-                <Text style={styles.dataLabel}>Total Jam Kerja</Text>
-                <Text style={styles.dataValue}>{profile.total_jam_kerja}</Text>
-              </View>
-              <View style={styles.dataBox}>
-                <Text style={styles.dataLabel}>Tempat Kerja</Text>
-                <Text style={styles.dataValue}>{profile.tempat_kerja}</Text>
+                <Text style={styles.dataLabel}>Status Pendaftar Anda</Text>
+                <Text
+                  style={[
+                    styles.dataValue,
+                    { color: profile.imageApproved ? "green" : "red" },
+                  ]}
+                >
+                  {profile.imageApproved ? "Disetujui ✅" : "Belum Disetujui ❌"}
+                </Text>
               </View>
             </>
           )}

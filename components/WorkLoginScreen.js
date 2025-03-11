@@ -21,13 +21,13 @@ const WorkLoginScreen = () => {
       if (querySnapshot.empty) {
         console.warn('Data Firestore kosong.');
       }
-      const usersData = querySnapshot.docs.map((doc, index) => {
+      const usersData = querySnapshot.docs.map((doc) => {
         const userData = doc.data();
         const poin = parseInt(userData.Points, 10) || 0;
 
         return {
           id: doc.id,
-          No: index + 1,
+          No: userData.No || '-',  // Nomor urut diambil dari database
           Name: userData.Name || '-',
           Tempat_Kerja: userData.Tempat_Kerja || '-',
           Tempat_Duduk: userData.Seating || '-',
@@ -74,7 +74,6 @@ const WorkLoginScreen = () => {
           <Text style={[styles.headerCell, { width: 40 }]}>No</Text>
           <Text style={[styles.headerCell, { flex: 2 }]}>Nama</Text>
           <Text style={[styles.headerCell, { flex: 2 }]}>Tempat Kerja</Text>
-          <Text style={[styles.headerCell, { flex: 1 }]}>Apsen</Text>
           <Text style={[styles.headerCell, { flex: 1 }]}>Poin</Text>
         </View>
 
@@ -86,7 +85,6 @@ const WorkLoginScreen = () => {
               <Text style={[styles.cell, { width: 40 }]}>{item.No}</Text>
               <Text style={[styles.cell, { flex: 2 }]}>{item.Name}</Text>
               <Text style={[styles.cell, { flex: 2 }]}>{item.Tempat_Kerja}</Text>
-              <Text style={[styles.cell, { flex: 1 }]}>{item.Jumlah_Apsen}</Text>
               <Text style={[styles.cell, { flex: 1 }]}>{item.Poin}</Text>
             </View>
           )}
