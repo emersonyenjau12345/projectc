@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   header: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 20,
@@ -186,46 +186,52 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#fff",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginVertical: 8,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    marginVertical: 10,
     width: "100%",
-    elevation: 3,
+    height: 50,
+    elevation: 3, // Efek bayangan untuk tampilan lebih modern
   },
   picker: {
     flex: 1,
-    height: 55,
+    height: 50,
   },
   icon: {
     marginRight: 10,
   },
   input: {
     flex: 1,
-    paddingVertical: 12,
+    fontSize: 16,
+    paddingVertical: 10,
   },
   eyeIcon: {
     padding: 5,
   },
   forgotPassword: {
     alignSelf: "flex-end",
-    marginTop: 5,
+    marginTop: 8,
+    marginBottom: 15,
   },
   forgotText: {
-    color: "#555",
+    color: "#4C86F3",
+    fontWeight: "600",
   },
   loginButton: {
     backgroundColor: "#4C86F3",
-    paddingVertical: 12,
+    paddingVertical: 15,
     width: "100%",
-    borderRadius: 8,
+    borderRadius: 10,
     alignItems: "center",
     marginTop: 10,
+    elevation: 5, // Efek shadow agar tombol lebih menonjol
   },
   loginText: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
     color: "#fff",
   },
 });
+
 
 export default VillageDeanLoginScreen;

@@ -93,6 +93,11 @@ const VillageDeanDashboardScreen = () => {
         return;
       }
   
+      if (user.points >= 1) {
+        alert("Error: Poin harus di bawah 1 untuk approve!");
+        return;
+      }
+  
       // Update Firestore
       const userRef = doc(db, "Users", id);
       await updateDoc(userRef, { ImageApproved: true });
@@ -107,26 +112,33 @@ const VillageDeanDashboardScreen = () => {
       console.error("Error approving image:", error);
     }
   };
+  
 
-  const approvePoints = async (id, points) => {
-    if (points >0) {
+  const approvePoints = async (id, points, imageUrl, imageApproved) => {
+    if (points > 0) {
       alert("Poin masih ada, tidak bisa disetujui!");
       return;
     }
-
+  
+    if (!imageUrl) {
+      alert("Gambar kerja harus tersedia sebelum menyetujui poin!");
+      return;
+    }
+  
     try {
       const userRef = doc(db, "Users", id);
       await updateDoc(userRef, { Approved: true });
-
+  
       setUsers(users.map(user =>
         user.id === id ? { ...user, Approved: true } : user
       ));
-
+  
       alert("Points Approved!");
     } catch (error) {
       console.error("Error approving points:", error);
     }
   };
+  
   
   const handleSave = async (id) => {
     const updatedUser  = editedData[id];
@@ -150,6 +162,19 @@ const VillageDeanDashboardScreen = () => {
       });
     }
   };
+
+  const getKeterangan = (points) => {
+    if (points >= 1 && points <= 28) {
+      return "Menghadap Sir Refly";
+    } else if (points >= 29 && points <= 49) {
+      return "Pemanggilan Orang Tua";
+    } else if (points >= 50) {
+      return "Diskors Semester Berikutnya";
+    } else {
+      return "Boleh Melakukan Pendaftaran"; // Jika tidak ada poin
+    }
+  };
+  
 
   return (
     <View style={styles.container}>
@@ -209,7 +234,7 @@ const VillageDeanDashboardScreen = () => {
       <Text style={styles.headerCell}>NIM</Text>
       <Text style={styles.headerCell}>Regis</Text>
       <Text style={styles.headerCell}>Seating</Text>
-      <Text style={styles.headerCell}>Tempat Kerja</Text>
+      <Text style={styles.headerCell}>Keterangan Hukuman</Text>
       <Text style={styles.headerCell}>Poin</Text>
       <Text style={styles.headerCell}>Keterangan</Text>
 
@@ -217,22 +242,24 @@ const VillageDeanDashboardScreen = () => {
 
     {/* Data Tabel */}
     <FlatList
-      data={filteredUsers}
-      keyExtractor={(item) => item.id}
-      renderItem={({ item }) => (
-        <View style={styles.tableRow}>
-          <Text style={styles.tableCell}>{item.No}</Text>
-          <Text style={styles.tableCell}>{item.Name}</Text>
-          <Text style={styles.tableCell}>{item.Nim}</Text>
-          <Text style={styles.tableCell}>{item.Regis}</Text>
-          <Text style={styles.tableCell}>{item.Seating}</Text>
-          <Text style={styles.tableCell}>{item.Tempat_Kerja}</Text>
-          <Text style={styles.tableCell}>{item.Points}</Text>
-          <Text style={styles.tableCell}>{item.ImageApproved ? "Disetujui" : "Belum Disetujui"}</Text>
-
-        </View>
-      )}
-    />
+  data={filteredUsers}
+  keyExtractor={(item) => item.id}
+  renderItem={({ item }) => {
+    const points = parseInt(item.Points) || 0;
+    return (
+      <View style={styles.tableRow}>
+        <Text style={styles.tableCell}>{item.No}</Text>
+        <Text style={styles.tableCell}>{item.Name}</Text>
+        <Text style={styles.tableCell}>{item.Nim}</Text>
+        <Text style={styles.tableCell}>{item.Regis}</Text>
+        <Text style={styles.tableCell}>{item.Seating}</Text>
+        <Text style={styles.tableCell}>{getKeterangan(points)}</Text>
+        <Text style={styles.tableCell}>{points}</Text>
+        <Text style={styles.tableCell}>{item.ImageApproved ? "Disetujui" : "Belum Disetujui"}</Text>
+      </View>
+    );
+  }}
+/>;
   </View>
 )}
 {activeTab === "approvePoints" && (

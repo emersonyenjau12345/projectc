@@ -1,5 +1,6 @@
 {
   "expo": {
+    "platforms": ["ios", "android", "web"],
     "name": "Projeck",
     "slug": "Projeck",
     "version": "1.0.0",

@@ -23,6 +23,19 @@ const ViewAbsentScreen = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Fungsi untuk mendapatkan keterangan berdasarkan total poin
+  const getKeterangan = (points) => {
+    if (points >= 1 && points <= 28) {
+      return "Menghadap Sir Refly";
+    } else if (points >= 29 && points <= 49) {
+      return "Pemanggilan Orang Tua";
+    } else if (points >= 50) {
+      return "Diskors Semester Berikutnya";
+    } else {
+      return "Boleh Melakukan Pendaftaran"; // Jika tidak ada poin
+    }
+  };
+
   useEffect(() => {
     if (!email) {
       setError("Email tidak tersedia.");
@@ -44,12 +57,14 @@ const ViewAbsentScreen = () => {
             console.log("✅ User ditemukan:", user);
 
             const imageApproved = user.ImageApproved || false;
+            const totalPoin = user.Points || 0; // Default ke 0 jika tidak tersedia
 
             setProfile({
               name: user.Name || "Tidak Diketahui",
-              total_poin: imageApproved ? "" : user.Points || "Tidak Diketahui",  // Hapus tempat kerja jika disetujui
+              total_poin: imageApproved ? "" : totalPoin, // Kosongkan jika disetujui
               total_jam_kerja: imageApproved ? "" : user.Jam || "Tidak Diketahui", 
               tempat_kerja: imageApproved ? "" : user.Tempat_Kerja || "Tidak Diketahui",
+              keterangan: getKeterangan(totalPoin), // Dapatkan status berdasarkan poin
               imageApproved,
             });
           });
@@ -87,26 +102,26 @@ const ViewAbsentScreen = () => {
             <Text style={styles.errorText}>{error}</Text>
           ) : (
             <>
-
-              {/* Tampilkan Tempat Kerja hanya jika ImageApproved === false */}
-
+              {/* Tampilkan data hanya jika ImageApproved === false */}
               {!profile.imageApproved && (
                 <View style={styles.dataBox}>
-                  <Text style={styles.dataLabel}>Toatal Jam Kerja</Text>
+                  <Text style={styles.dataLabel}>Total Jam Kerja</Text>
                   <Text style={styles.dataValue}>{profile.total_jam_kerja}</Text>
                 </View>
               )}
 
               {!profile.imageApproved && (
                 <View style={styles.dataBox}>
-                  <Text style={styles.dataLabel}>Toatal Poin</Text>
+                  <Text style={styles.dataLabel}>Total Poin</Text>
                   <Text style={styles.dataValue}>{profile.total_poin}</Text>
                 </View>
               )}
+
+              {/* Tambahkan status berdasarkan total poin */}
               {!profile.imageApproved && (
                 <View style={styles.dataBox}>
-                  <Text style={styles.dataLabel}>Tempat Kerja</Text>
-                  <Text style={styles.dataValue}>{profile.tempat_kerja}</Text>
+                  <Text style={styles.dataLabel}>Keterangan Hukuman</Text>
+                  <Text style={styles.dataValue}>{profile.keterangan}</Text>
                 </View>
               )}
 
