@@ -23,7 +23,7 @@ const Stack = createStackNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <BackButtonHandler /> {/* Tambahkan di sini agar aktif di semua layar */}
+      <BackButtonHandler /> {/* Menangani tombol kembali di semua layar */}
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="StudentLogin" component={StudentLoginScreen} />
