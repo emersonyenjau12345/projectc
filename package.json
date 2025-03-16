@@ -44,7 +44,9 @@
     "@react-native/metro-config": "^0.78.0",
     "metro": "^0.82.0",
     "metro-config": "^0.82.0",
-    "metro-core": "^0.82.0"
+    "metro-core": "^0.82.0",
+    "typescript": "^5.3.3",
+    "@types/react": "~18.3.12"
   },
   "private": true
 }
