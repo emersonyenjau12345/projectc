@@ -2,8 +2,6 @@ import React from "react";
 import { Text } from "react-native"; // Tambahkan ini untuk memastikan bisa digunakan
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import BackButtonHandler from "./BackButtonHandler";
-
 import HomeScreen from "./components/HomeScreen";
 import StudentLoginScreen from "./components/StudentLoginScreen";
 import VillageDeanLoginScreen from "./components/VillageDeanLoginScreen";
@@ -24,7 +22,6 @@ const Stack = createStackNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <BackButtonHandler />
       {/* Tambahkan Text sebagai placeholder untuk menghindari error */}
       <Text style={{ position: "absolute", top: -9999 }}>App Loaded</Text>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
