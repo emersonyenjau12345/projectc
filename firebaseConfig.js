@@ -18,7 +18,7 @@ const firebaseConfig = {
   projectId: "coneksiaplikasi",
   storageBucket: "coneksiaplikasi.firebasestorage.app",
   messagingSenderId: "226840353263",
-  appId: "1:226840353263:web:36a0982a55cb1e12e3fe1a"
+  appId: "1:226840353263:web:b5cd2f26efd5ebfae3fe1a"
 };
 
 // Cek apakah Firebase sudah diinisialisasi sebelumnya
