@@ -127,7 +127,7 @@ const InputDataScreen = () => {
           placeholder="Tambahkan deskripsi"
           placeholderTextColor="#888"
           value={description}
-          onChangeText={setDescription}
+          onChangeText={(text) => setDescription(text)} // Tanpa batasan karakter
         />
 
         <TouchableOpacity style={styles.uploadButton} onPress={uploadToCloudinary}>

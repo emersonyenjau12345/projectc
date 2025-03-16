@@ -6,6 +6,7 @@ import { ref, onValue, push, update } from "firebase/database";
 
 const chatPath = "chats";
 
+// Fungsi menandai pesan sebagai 'Dibaca'
 const markMessagesAsRead = async (senderEmail, userEmail) => {
     const messagesRef = ref(realtimeDb, chatPath);
     onValue(messagesRef, (snapshot) => {
@@ -24,13 +25,16 @@ const markMessagesAsRead = async (senderEmail, userEmail) => {
     }, { onlyOnce: true });
 };
 
+
 const VillageChating = ({ navigation }) => {
     const [inputText, setInputText] = useState("");
     const [userEmail, setUserEmail] = useState("");
     const [chatMessages, setChatMessages] = useState([]);
-    const [unreadSenders, setUnreadSenders] = useState([]);
     const [unreadCounts, setUnreadCounts] = useState({});
+    const [chatSenders, setChatSenders] = useState([]); // Menyimpan history email masuk
     const [selectedSender, setSelectedSender] = useState(null);
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [totalUnread, setTotalUnread] = useState(0);
     const flatListRef = useRef(null);
 
     useEffect(() => {
@@ -51,33 +55,39 @@ const VillageChating = ({ navigation }) => {
                     .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
                 const unreadMessages = {};
-                const senders = [...new Set(sortedMessages
-                    .filter(msg => msg.sender !== "Admin" && msg.receiver === userEmail)
-                    .map(msg => msg.sender))];
+                let totalUnreadCount = 0;
+                const senders = new Set();
 
-                senders.forEach(sender => {
-                    const unreadCount = sortedMessages.filter(msg => msg.sender === sender && msg.receiver === userEmail && msg.status !== "Dibaca").length;
-                    unreadMessages[sender] = unreadCount;
+                sortedMessages.forEach(msg => {
+                    if (msg.receiver === userEmail) {
+                        senders.add(msg.sender);
+                        if (msg.sender !== userEmail && msg.status !== "Dibaca") {
+                            if (!unreadMessages[msg.sender]) unreadMessages[msg.sender] = 0;
+                            unreadMessages[msg.sender]++;
+                            totalUnreadCount++;
+                        }
+                    }
                 });
 
                 setUnreadCounts(unreadMessages);
-                setUnreadSenders(senders);
+                setChatSenders(Array.from(senders)); // Simpan history email masuk
+                setTotalUnread(totalUnreadCount);
 
+                // Chat tidak langsung muncul, hanya ditampilkan saat dipilih dari notifikasi
                 if (selectedSender) {
-                    setChatMessages(sortedMessages.filter(msg => 
-                        (msg.sender === selectedSender && msg.receiver === userEmail) || 
+                    setChatMessages(sortedMessages.filter(msg =>
+                        (msg.sender === selectedSender && msg.receiver === userEmail) ||
                         (msg.sender === userEmail && msg.receiver === selectedSender)
                     ));
-
-                    // Jika sedang di dalam chat dan ada pesan baru, langsung tandai sebagai dibaca
                     markMessagesAsRead(selectedSender, userEmail);
                 } else {
-                    setChatMessages([]);
+                    setChatMessages([]); // Reset messages if no sender is selected
                 }
             } else {
-                setUnreadSenders([]);
                 setUnreadCounts({});
+                setTotalUnread(0);
                 setChatMessages([]);
+                setChatSenders([]); // Reset daftar pengirim jika tidak ada pesan
             }
         });
 
@@ -86,6 +96,7 @@ const VillageChating = ({ navigation }) => {
 
     const handleSelectSender = (sender) => {
         setSelectedSender(sender);
+        setShowNotifications(false);
         markMessagesAsRead(sender, userEmail);
     };
 
@@ -101,7 +112,7 @@ const VillageChating = ({ navigation }) => {
             };
 
             push(chatRef, newMessage);
-            setInputText("");
+            setInputText(""); // Reset inputText setelah kirim pesan
         }
     };
 
@@ -112,20 +123,38 @@ const VillageChating = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
+                <TouchableOpacity onPress={() => {
+                    if (selectedSender) {
+                        setSelectedSender(null);
+                    } else {
+                        navigation.goBack();
+                    }
+                }}>
                     <Ionicons name="arrow-back" size={30} color="#7D2675" />
                 </TouchableOpacity>
                 <Text style={styles.username}>Chat Admin</Text>
+                <TouchableOpacity onPress={() => setShowNotifications(!showNotifications)} style={styles.notificationIcon}>
+                    <Ionicons name="notifications" size={30} color={totalUnread > 0 ? "red" : "#7D2675"} />
+                    {totalUnread > 0 && (
+                        <View style={styles.badge}>
+                            <Text style={styles.badgeText}>{totalUnread}</Text>
+                        </View>
+                    )}
+                </TouchableOpacity>
             </View>
 
-            <View style={styles.notificationContainer}>
-                <Text style={styles.notificationTitle}>Pesan Masuk</Text>
-                {unreadSenders.map((sender, index) => (
-                    <TouchableOpacity key={index} onPress={() => handleSelectSender(sender)} style={styles.notificationItem}>
-                        <Text style={styles.notificationText}>{sender} {unreadCounts[sender] > 0 && `(${unreadCounts[sender]})`}</Text>
-                    </TouchableOpacity>
-                ))}
-            </View>
+            {showNotifications && (
+                <View style={styles.notificationContainer}>
+                    <Text style={styles.notificationTitle}>Pesan Masuk</Text>
+                    {chatSenders.map((sender, index) => (
+                        <TouchableOpacity key={index} onPress={() => handleSelectSender(sender)} style={styles.notificationItem}>
+                            <Text style={styles.notificationText}>
+                                {sender} {unreadCounts[sender] ? `(${unreadCounts[sender]} pesan baru)` : ""}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+                </View>
+            )}
 
             {selectedSender && (
                 <FlatList
@@ -134,18 +163,13 @@ const VillageChating = ({ navigation }) => {
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
                         <View style={[
-                            styles.messageContainer,
-                            item.sender === userEmail ? styles.userMessage : styles.adminMessage
+                            styles.messageContainer, 
+                            item.sender === userEmail ? styles.userMessage : styles.adminMessage,
+                            { justifyContent: item.sender === userEmail ? "flex-end" : "flex-start" } // Mengubah posisi pesan
                         ]}>
-                            <Ionicons
-                                name={item.sender === userEmail ? "person-circle-outline" : "school-outline"}
-                                size={24}
-                                color={item.sender === userEmail ? "#7D2675" : "#2E86C1"}
-                                style={{ marginRight: 5 }}
-                            />
                             <View style={[styles.messageBubble, item.sender === userEmail ? styles.userBubble : styles.adminBubble]}>
                                 {isImageUrl(item.text) ? (
-                                    <Image source={{ uri: item.text }} style={{ width: 150, height: 150, borderRadius: 10 }} />
+                                    <Image source={{ uri: item.text }} style={styles.imageMessage} />
                                 ) : (
                                     <Text style={styles.messageText}>{item.text}</Text>
                                 )}
@@ -162,6 +186,7 @@ const VillageChating = ({ navigation }) => {
                         placeholder="Ketik pesan..."
                         value={inputText}
                         onChangeText={setInputText}
+                        multiline={false} // Set multiline to false for single line input
                     />
                     <TouchableOpacity onPress={handleSendMessage}>
                         <Ionicons name="send" size={24} color="#7D2675" />
@@ -171,10 +196,20 @@ const VillageChating = ({ navigation }) => {
         </View>
     );
 };
+
 const styles = StyleSheet.create({
-    // Tambahkan warna untuk membedakan pesan admin dan student
-    userBubble: { backgroundColor: "#D1C4E9" },
-    adminBubble: { backgroundColor: "#BBDEFB" },
+    // Bubble chat untuk user (siswa)
+    userBubble: { 
+        backgroundColor: "#D1C4E9", // Warna untuk siswa (contoh ungu muda)
+        alignSelf: "flex-start", // Pesan admin di kiri
+    },
+
+    // Bubble chat untuk admin
+    adminBubble: { 
+        backgroundColor: "#BBDEFB", // Warna untuk admin (contoh biru muda)
+        alignSelf: "flex-end", // Pesan siswa di kanan
+    },
+
     container: { flex: 1, backgroundColor: "#F2F2F2", paddingHorizontal: 10, paddingBottom: 10 },
     header: {
         flexDirection: "row",
@@ -191,12 +226,24 @@ const styles = StyleSheet.create({
     notificationItem: { padding: 10, backgroundColor: "#E3E3E3", marginVertical: 5, borderRadius: 5 },
     notificationText: { fontSize: 14, color: "#333" },
     messageContainer: { flexDirection: "row", alignItems: "center", marginVertical: 5 },
-    userMessage: { alignSelf: "flex-end", flexDirection: "row-reverse" },
-    adminMessage: { alignSelf: "flex-start" },
-    messageBubble: { padding: 10, borderRadius: 10, backgroundColor: "#FFF", elevation: 2, maxWidth: "75%" },
+    messageBubble: { padding: 10, borderRadius: 15, backgroundColor: "#FFF", elevation: 2, maxWidth: "75%" },
     messageText: { fontSize: 16, color: "#333" },
     inputBar: { flexDirection: "row", alignItems: "center", padding: 10, backgroundColor: "#FFF", borderRadius: 30, elevation: 2 },
     input: { flex: 1, padding: 10, borderRadius: 20, fontSize: 16 },
+    imageMessage: {
+        width: 200,
+        height: 200,
+        borderRadius: 10,
+        resizeMode: "cover",
+    },
+    imageBubble: {
+        padding: 10,
+        borderRadius: 15,
+        backgroundColor: "#FFF",
+        elevation: 2,
+        maxWidth: "70%",
+        alignItems: "center"
+    }
 });
 
 export default VillageChating;

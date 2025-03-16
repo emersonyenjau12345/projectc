@@ -12,9 +12,12 @@ import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { getFirestore, doc, updateDoc, getDoc } from "firebase/firestore";
+import { useWindowDimensions } from "react-native";
 
 const VillageDeanLoginScreen = () => {
   const navigation = useNavigation();
+  const { width } = useWindowDimensions(); // Gunakan ukuran layar
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [secureText, setSecureText] = useState(true);
@@ -25,34 +28,6 @@ const VillageDeanLoginScreen = () => {
 
   const ADMIN_EMAIL = "s21810030@student.unklab.ac.id";
   const WORKER_EMAILS = ["s11810307@student.unklab.ac.id"];
-
-  // Fungsi untuk memperbarui password di Firestore
-  const updatePasswordInFirestore = async (email, newPassword, role) => {
-    try {
-      let userDocRef;
-
-      if (role === "Village Dean") {
-        userDocRef = doc(db, "Users", "admin");
-      } else if (role === "Pihak Kerja") {
-        userDocRef = doc(db, "Users", "pekerjaan"); // Menggunakan email sebagai ID dokumen
-      } else {
-        return;
-      }
-
-      const userDoc = await getDoc(userDocRef);
-      if (userDoc.exists()) {
-        await updateDoc(userDocRef, { Password: newPassword });
-        console.log(`✅ Password diperbarui di Firestore untuk ${role}.`);
-      } else {
-        console.log(`❌ Data ${role} tidak ditemukan di Firestore.`);
-      }
-    } catch (error) {
-      console.error(
-        `❌ Gagal memperbarui password di Firestore untuk ${role}:`,
-        error
-      );
-    }
-  };
 
   // Fungsi Login
   const handleLogin = async () => {
@@ -70,11 +45,9 @@ const VillageDeanLoginScreen = () => {
       const user = userCredential.user;
 
       if (role === "Village Dean" && email === ADMIN_EMAIL) {
-        await updatePasswordInFirestore(email, password, "Village Dean");
         Alert.alert("Login Sukses", "Selamat datang, Village Dean!");
         navigation.navigate("VillageDeanDashboard");
       } else if (role === "Pihak Kerja" && WORKER_EMAILS.includes(email)) {
-        await updatePasswordInFirestore(email, password, "Pihak Kerja");
         Alert.alert("Login Sukses", "Selamat datang, Pihak Kerja!");
         navigation.navigate("WorkLoginScreen");
       } else {
@@ -96,7 +69,7 @@ const VillageDeanLoginScreen = () => {
       </Text>
 
       {/* Dropdown Role */}
-      <View style={styles.inputContainer}>
+      <View style={[styles.inputContainer, { width: Math.min(width * 0.9, 400) }]}>
         <Picker
           selectedValue={role}
           style={styles.picker}
@@ -108,7 +81,7 @@ const VillageDeanLoginScreen = () => {
       </View>
 
       {/* Input Email */}
-      <View style={styles.inputContainer}>
+      <View style={[styles.inputContainer, { width: Math.min(width * 0.9, 400) }]}>
         <FontAwesome5
           name="user-alt"
           size={20}
@@ -125,7 +98,7 @@ const VillageDeanLoginScreen = () => {
       </View>
 
       {/* Input Password */}
-      <View style={styles.inputContainer}>
+      <View style={[styles.inputContainer, { width: Math.min(width * 0.9, 400) }]}>
         <FontAwesome5
           name="lock"
           size={20}
@@ -160,7 +133,10 @@ const VillageDeanLoginScreen = () => {
       </TouchableOpacity>
 
       {/* Login Button */}
-      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+      <TouchableOpacity
+        style={[styles.loginButton, { width: Math.min(width * 0.9, 400) }]}
+        onPress={handleLogin}
+      >
         <Text style={styles.loginText}>Login</Text>
       </TouchableOpacity>
     </View>
@@ -189,8 +165,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 12,
     marginVertical: 10,
-    width: "100%",
-    height: 50,
+    minHeight: 50,
     elevation: 3, // Efek bayangan untuk tampilan lebih modern
   },
   picker: {
@@ -209,7 +184,7 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   forgotPassword: {
-    alignSelf: "flex-end",
+    alignSelf: "center",
     marginTop: 8,
     marginBottom: 15,
   },
@@ -220,7 +195,6 @@ const styles = StyleSheet.create({
   loginButton: {
     backgroundColor: "#4C86F3",
     paddingVertical: 15,
-    width: "100%",
     borderRadius: 10,
     alignItems: "center",
     marginTop: 10,
@@ -232,6 +206,5 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
 });
-
 
 export default VillageDeanLoginScreen;

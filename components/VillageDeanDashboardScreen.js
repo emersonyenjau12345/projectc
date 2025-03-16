@@ -78,67 +78,51 @@ const VillageDeanDashboardScreen = () => {
     }
   };
 
-  const approveImage = async (id) => {
-    try {
-      // Cari user berdasarkan id di state users
-      const user = users.find((user) => user.id === id);
-  
-      if (!user) {
-        alert("Error: Pengguna tidak ditemukan!");
-        return;
-      }
-  
-      if (!user.imageUrl) {
-        alert("Error: Gambar belum tersedia!");
-        return;
-      }
-  
-      if (user.points >= 1) {
-        alert("Error: Poin harus di bawah 1 untuk approve!");
-        return;
-      }
-  
-      // Update Firestore
-      const userRef = doc(db, "Users", id);
-      await updateDoc(userRef, { ImageApproved: true });
-  
-      // Perbarui state lokal
-      setUsers(users.map(user =>
-        user.id === id ? { ...user, ImageApproved: true } : user
-      ));
-  
-      alert("Gambar Disetujui!");
-    } catch (error) {
-      console.error("Error approving image:", error);
-    }
-  };
-  
 
-  const approvePoints = async (id, points, imageUrl, imageApproved) => {
-    if (points > 0) {
-      alert("Poin masih ada, tidak bisa disetujui!");
-      return;
-    }
-  
-    if (!imageUrl) {
-      alert("Gambar kerja harus tersedia sebelum menyetujui poin!");
-      return;
-    }
-  
+  const approveImage = async (id, email) => {
     try {
-      const userRef = doc(db, "Users", id);
-      await updateDoc(userRef, { Approved: true });
-  
-      setUsers(users.map(user =>
-        user.id === id ? { ...user, Approved: true } : user
-      ));
-  
-      alert("Points Approved!");
+        console.log("Mencari pengguna dengan email:", email); // Debugging
+
+        const usersCollection = collection(db, "Users");
+        const userSnapshot = await getDocs(usersCollection);
+        
+        // Debugging: Menampilkan semua user yang diambil dari Firestore
+        const allUsers = userSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        console.log("Semua user yang ditemukan:", allUsers);
+
+        // Mencari user berdasarkan email
+        const userData = allUsers.find((user) => user.Email.toLowerCase() === email.toLowerCase());
+
+        if (!userData) {
+            alert("Error: Pengguna tidak ditemukan!");
+            return;
+        }
+
+        if (!userData.imageUrl || userData.imageUrl.trim() === "") {
+            alert("Error: Gambar belum tersedia!");
+            return;
+        }
+
+        if (parseInt(userData.Points, 10) !== 0) {
+            alert("Error: Poin harus 0 untuk approve!");
+            return;
+        }
+
+        // Update Firestore
+        const userRef = doc(db, "Users", userData.id);
+        await updateDoc(userRef, { ImageApproved: true });
+
+        // Perbarui state lokal
+        setUsers(users.map(user =>
+            user.id === userData.id ? { ...user, ImageApproved: true } : user
+        ));
+
+        alert("Gambar Disetujui!");
     } catch (error) {
-      console.error("Error approving points:", error);
+        console.error("Error approving image:", error);
     }
-  };
-  
+};
+
   
   const handleSave = async (id) => {
     const updatedUser  = editedData[id];
@@ -212,7 +196,7 @@ const VillageDeanDashboardScreen = () => {
             <Text style={styles.sidebarItem}>Approve Points</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate('VillageChating')}>
-             <Text style={styles.sidebarItem}>Messe(0)</Text>
+             <Text style={styles.sidebarItem}>Messe</Text>
           </TouchableOpacity>
         </View>
 
@@ -266,14 +250,14 @@ const VillageDeanDashboardScreen = () => {
   <View>
     {/* Keterangan Header Tabel */}
     <View style={styles.tableHeader}>
-  <Text style={[styles.headerCell, { paddingHorizontal: 40 }]}>No</Text>
-  <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Nama </Text>
-  <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Nim</Text>
-  <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Jam Kerja</Text>
-  <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Poin Mahasiswa</Text>
-  <Text style={[styles.headerCell, { paddingHorizontal: 10 }]}>Aksi</Text>
-</View>
-
+      <Text style={[styles.headerCell, { paddingHorizontal: 40 }]}>No</Text>
+      <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Nama</Text>
+      <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Nim</Text>
+      <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Jam Kerja</Text>
+      <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Poin Mahasiswa</Text>
+      <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Keterangan</Text>
+      <Text style={[styles.headerCell, { paddingHorizontal: 10 }]}>Aksi</Text>
+    </View>
 
     {/* Data Tabel */}
     <FlatList
@@ -281,6 +265,16 @@ const VillageDeanDashboardScreen = () => {
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => {
         const points = parseInt(item.Points) || 0;
+
+        // Split description by spaces to create word array
+        const descriptionWords = item.description ? item.description.split(' ') : [];
+
+        // Split into chunks of 20 words
+        const descriptionChunks = [];
+        for (let i = 0; i < descriptionWords.length; i += 15) {
+          descriptionChunks.push(descriptionWords.slice(i, i + 15).join(' '));
+        }
+
         return (
           <View style={styles.tableRow}>
             <Text style={styles.tableCell}>{item.No}</Text>
@@ -288,6 +282,15 @@ const VillageDeanDashboardScreen = () => {
             <Text style={styles.tableCell}>{item.Nim}</Text>
             <Text style={styles.tableCell}>{item.Jam}</Text>
             <Text style={styles.tableCell}>{points}</Text>
+
+            {/* Menampilkan keterangan dengan pemisahan otomatis setiap 20 kata */}
+            <View style={styles.tableCell}>
+              {descriptionChunks.map((chunk, index) => (
+                <Text key={index}>{chunk}</Text>
+              ))}
+
+              
+            </View>
 
             <View style={styles.iconContainer}>
               <TouchableOpacity onPress={() => approvePoints(item.id, points)}>
@@ -302,13 +305,17 @@ const VillageDeanDashboardScreen = () => {
                 <FontAwesome5 name="image" size={20} color="blue" />
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => approveImage(item.id)}>
-                <FontAwesome5
-                  name="thumbs-up"
-                  size={20}
-                  color={item.ImageApproved ? "green" : "gray"}
-                />
-              </TouchableOpacity>
+              <TouchableOpacity onPress={() => {
+    console.log("Icon jempol ditekan untuk ID:", item.id);
+    approveImage(item.id, item.Email);
+}}>
+    <FontAwesome5
+        name="thumbs-up"
+        size={20}
+        color={item.ImageApproved ? "green" : "gray"}
+    />
+</TouchableOpacity>
+
             </View>
           </View>
         );
@@ -317,19 +324,19 @@ const VillageDeanDashboardScreen = () => {
   </View>
 )}
 
+
 {activeTab === "editPoints" && (
   <View>
     {/* Keterangan Header Tabel */}
     <View style={styles.tableHeader}>
-  <Text style={[styles.headerCell, { flex: 1.5}]}>No</Text>
-  <Text style={[styles.headerCell, { flex: 1.5 }]}>Nama</Text>
-  <Text style={[styles.headerCell, { flex: 1.5 }]}>NIM</Text>
-  <Text style={[styles.headerCell, { flex: 1.5 }]}>Regis</Text>
-  <Text style={[styles.headerCell, { flex: 1.5 }]}>Jam Kerja</Text>
-  <Text style={[styles.headerCell, { flex: 1.5 }]}>Poin</Text>
-  <Text style={[styles.headerCell, { flex: 1.5 }]}>Aksi</Text>
-  </View>
-
+      <Text style={[styles.headerCell, { flex: 1.5 }]}>No</Text>
+      <Text style={[styles.headerCell, { flex: 1.5 }]}>Nama</Text>
+      <Text style={[styles.headerCell, { flex: 1.5 }]}>NIM</Text>
+      <Text style={[styles.headerCell, { flex: 1.5 }]}>Regis</Text>
+      <Text style={[styles.headerCell, { flex: 1.5 }]}>Jam Kerja</Text>
+      <Text style={[styles.headerCell, { flex: 1.5 }]}>Poin</Text>
+      <Text style={[styles.headerCell, { flex: 1.5 }]}>Aksi</Text>
+    </View>
 
     {/* Data Tabel */}
     <FlatList

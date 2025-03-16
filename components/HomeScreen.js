@@ -5,46 +5,63 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  Dimensions,
+  useWindowDimensions,
+  Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useWindowDimensions } from "react-native";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
   const { width, height } = useWindowDimensions();
 
+  // Menyesuaikan ukuran tombol berdasarkan ukuran layar
+  const buttonWidth = width > 600 ? width * 0.5 : width * 0.8;
+
   return (
     <View style={styles.container}>
+      {/* Logo */}
       <Image
         source={require("../assets/logo.png")}
         style={[styles.logo, { width: width * 0.8, height: height * 0.25 }]}
       />
+
+      {/* Title Section */}
       <View style={styles.titleContainer}>
         <View style={styles.line} />
         <Text style={styles.title}>REDEEM POINT</Text>
         <View style={styles.line} />
       </View>
-      <Text style={styles.verse}>
-        "Apapun juga yang kamu perbuat, perbuatlah dengan segenap hatimu seperti
-        untuk Tuhan dan bukan untuk manusia."
-      </Text>
-      <Text style={styles.verseRef}>KOLOSE 3:23</Text>
 
+      {/* Verse */}
+      <Text
+        style={[
+          styles.verse,
+          Platform.OS === "web" ? { maxWidth: width * 0.6, fontSize: 12 } : null,
+        ]}
+        numberOfLines={Platform.OS === "web" ? 2 : undefined}
+        adjustsFontSizeToFit={Platform.OS === "web"}
+      >
+        "Janganlah kita menjauhkan diri dari ibadah, tetapi marilah kita saling
+        menasihati, dan semakin giat melakukannya."
+      </Text>
+      <Text style={styles.verseRef}>Ibrani 10:25</Text>
+
+      {/* Login Buttons */}
       <TouchableOpacity
-        style={[styles.button, { width: width * 0.8 }]}
+        style={[styles.button, { width: buttonWidth }]} // Lebar tombol disesuaikan
         onPress={() => navigation.navigate("VillageDeanLogin")}
       >
         <Text style={styles.buttonText}>Login Village Dean</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={[styles.button, { width: width * 0.8 }]}
+        style={[styles.button, { width: buttonWidth }]} // Lebar tombol disesuaikan
         onPress={() => navigation.navigate("StudentLogin")}
       >
         <Text style={styles.buttonText}>Login Student</Text>
       </TouchableOpacity>
 
+      {/* Footer */}
       <Text style={[styles.footer, { bottom: height * 0.05 }]}>
         UNIVERSITAS KLABAT
       </Text>
