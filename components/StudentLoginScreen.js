@@ -139,8 +139,12 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    paddingVertical: 12,
+    fontSize: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 0, // Menghindari garis bawah hitam kecil
+    outlineStyle: "none", // Untuk mencegah efek focus di web
   },
+  
   eyeIcon: {
     padding: 5,
   },

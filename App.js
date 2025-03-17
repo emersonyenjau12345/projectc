@@ -1,4 +1,5 @@
 import React from "react";
+import "./firebaseConfig"; // Pastikan file ini dipanggil lebih awal
 import { Text } from "react-native"; // Tambahkan ini untuk memastikan bisa digunakan
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";

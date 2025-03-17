@@ -115,8 +115,12 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    paddingVertical: 12,
+    fontSize: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 0, // Menghindari garis bawah hitam kecil
+    outlineStyle: "none", // Untuk mencegah efek focus di web
   },
+  
   resetButton: {
     backgroundColor: "#4C86F3",
     paddingVertical: 12,

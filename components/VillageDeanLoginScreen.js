@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,30 +6,43 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  BackHandler,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { getFirestore, doc, updateDoc, getDoc } from "firebase/firestore";
 import { useWindowDimensions } from "react-native";
 
 const VillageDeanLoginScreen = () => {
   const navigation = useNavigation();
-  const { width } = useWindowDimensions(); // Gunakan ukuran layar
+  const { width } = useWindowDimensions();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [secureText, setSecureText] = useState(true);
   const [role, setRole] = useState("Village Dean");
 
-  const auth = getAuth();
-  const db = getFirestore();
-
   const ADMIN_EMAIL = "s21810030@student.unklab.ac.id";
   const WORKER_EMAILS = ["s11810307@student.unklab.ac.id"];
 
-  // Fungsi Login
+  useEffect(() => {
+    const backAction = () => {
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+        return true;
+      }
+      return false;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, [navigation]);
+
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert("Error", "Email dan Password harus diisi!");
@@ -38,7 +51,7 @@ const VillageDeanLoginScreen = () => {
 
     try {
       const userCredential = await signInWithEmailAndPassword(
-        auth,
+        getAuth(),
         email,
         password
       );
@@ -51,10 +64,7 @@ const VillageDeanLoginScreen = () => {
         Alert.alert("Login Sukses", "Selamat datang, Pihak Kerja!");
         navigation.navigate("WorkLoginScreen");
       } else {
-        Alert.alert(
-          "Akses Ditolak",
-          "Email tidak cocok dengan role yang dipilih."
-        );
+        Alert.alert("Akses Ditolak", "Email tidak cocok dengan role yang dipilih.");
       }
     } catch (error) {
       console.error("❌ Login Gagal:", error);
@@ -67,8 +77,6 @@ const VillageDeanLoginScreen = () => {
       <Text style={styles.header}>
         Welcome back to the Klabat University point redemption login menu
       </Text>
-
-      {/* Dropdown Role */}
       <View style={[styles.inputContainer, { width: Math.min(width * 0.9, 400) }]}>
         <Picker
           selectedValue={role}
@@ -79,8 +87,6 @@ const VillageDeanLoginScreen = () => {
           <Picker.Item label="Pihak Kerja" value="Pihak Kerja" />
         </Picker>
       </View>
-
-      {/* Input Email */}
       <View style={[styles.inputContainer, { width: Math.min(width * 0.9, 400) }]}>
         <FontAwesome5
           name="user-alt"
@@ -96,8 +102,6 @@ const VillageDeanLoginScreen = () => {
           keyboardType="email-address"
         />
       </View>
-
-      {/* Input Password */}
       <View style={[styles.inputContainer, { width: Math.min(width * 0.9, 400) }]}>
         <FontAwesome5
           name="lock"
@@ -123,16 +127,12 @@ const VillageDeanLoginScreen = () => {
           />
         </TouchableOpacity>
       </View>
-
-      {/* Forgot Password */}
       <TouchableOpacity
         onPress={() => navigation.navigate("ForgotPasswordScreen")}
         style={styles.forgotPassword}
       >
         <Text style={styles.forgotText}>Forgot Password ?</Text>
       </TouchableOpacity>
-
-      {/* Login Button */}
       <TouchableOpacity
         style={[styles.loginButton, { width: Math.min(width * 0.9, 400) }]}
         onPress={handleLogin}
@@ -166,11 +166,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     marginVertical: 10,
     minHeight: 50,
-    elevation: 3, // Efek bayangan untuk tampilan lebih modern
+    elevation: 3,
   },
   picker: {
     flex: 1,
     height: 50,
+    borderWidth: 0,
+    borderBottomWidth: 0,
+    outlineStyle: "none",
+    color: "#333",
   },
   icon: {
     marginRight: 10,
@@ -179,7 +183,9 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     paddingVertical: 10,
-  },
+    borderBottomWidth: 0,
+    outlineStyle: "none",
+  },  
   eyeIcon: {
     padding: 5,
   },
@@ -198,7 +204,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     marginTop: 10,
-    elevation: 5, // Efek shadow agar tombol lebih menonjol
+    elevation: 5,
   },
   loginText: {
     fontSize: 18,

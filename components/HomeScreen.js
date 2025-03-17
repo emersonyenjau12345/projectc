@@ -4,6 +4,7 @@ import {
   Text,
   TouchableOpacity,
   Image,
+  ImageBackground,
   StyleSheet,
   useWindowDimensions,
   Platform,
@@ -13,17 +14,56 @@ import { useNavigation } from "@react-navigation/native";
 const HomeScreen = () => {
   const navigation = useNavigation();
   const { width, height } = useWindowDimensions();
+  const isPC = Platform.OS === "web" && width > 800; // Deteksi platform PC
 
-  // Menyesuaikan ukuran tombol berdasarkan ukuran layar
-  const buttonWidth = width > 600 ? width * 0.5 : width * 0.8;
+  return isPC ? (
+    <ImageBackground
+      source={require("../assets/pioneer_chapel.jpg")}
+      style={styles.pcBackground}
+      imageStyle={{ opacity: 0.3 }} // Efek transparan pada gambar
+    >
+      <View style={styles.pcContainer}>
+        {/* Logo */}
+        <Image source={require("../assets/logo.png")} style={styles.pcLogo} />
 
-  return (
-    <View style={styles.container}>
+        {/* Title Section */}
+        <View style={styles.titleContainer}>
+          <View style={styles.line} />
+          <Text style={styles.title}>REDEEM POINT</Text>
+          <View style={styles.line} />
+        </View>
+
+        {/* Verse */}
+       <Text style={isPC ? styles.pcVerse : styles.verse}>
+       Janganlah kita menjauhkan diri dari ibadah,{"\n"}
+       tetapi marilah kita saling menasihati,{"\n"}
+       dan semakin giat melakukannya.
+       </Text>
+
+       
+        {/* Teks Ibrani 10:25 yang berfungsi sebagai tombol login Village Dean */}
+        <TouchableOpacity
+          onPress={() => navigation.navigate("VillageDeanLogin")}
+        >
+          <Text style={styles.verseRef}>Ibrani 10:25</Text>
+        </TouchableOpacity>
+
+        {/* Login Student Button */}
+        <TouchableOpacity
+          style={styles.pcButton}
+          onPress={() => navigation.navigate("StudentLogin")}
+        >
+          <Text style={styles.buttonText}>Login Student</Text>
+        </TouchableOpacity>
+
+        {/* Footer */}
+        <Text style={styles.footer}>UNIVERSITAS KLABAT</Text>
+      </View>
+    </ImageBackground>
+  ) : (
+    <View style={styles.mobileContainer}>
       {/* Logo */}
-      <Image
-        source={require("../assets/logo.png")}
-        style={[styles.logo, { width: width * 0.8, height: height * 0.25 }]}
-      />
+      <Image source={require("../assets/logo.png")} style={styles.mobileLogo} />
 
       {/* Title Section */}
       <View style={styles.titleContainer}>
@@ -33,58 +73,67 @@ const HomeScreen = () => {
       </View>
 
       {/* Verse */}
-      <Text
-        style={[
-          styles.verse,
-          Platform.OS === "web" ? { maxWidth: width * 0.6, fontSize: 12 } : null,
-        ]}
-        numberOfLines={Platform.OS === "web" ? 2 : undefined}
-        adjustsFontSizeToFit={Platform.OS === "web"}
-      >
+      <Text style={styles.verse}>
         "Janganlah kita menjauhkan diri dari ibadah, tetapi marilah kita saling
         menasihati, dan semakin giat melakukannya."
       </Text>
-      <Text style={styles.verseRef}>Ibrani 10:25</Text>
 
-      {/* Login Buttons */}
+      {/* Teks Ibrani 10:25 yang berfungsi sebagai tombol login Village Dean */}
       <TouchableOpacity
-        style={[styles.button, { width: buttonWidth }]} // Lebar tombol disesuaikan
         onPress={() => navigation.navigate("VillageDeanLogin")}
       >
-        <Text style={styles.buttonText}>Login Village Dean</Text>
+        <Text style={styles.verseRef}>Ibrani 10:25</Text>
       </TouchableOpacity>
 
+      {/* Login Student Button */}
       <TouchableOpacity
-        style={[styles.button, { width: buttonWidth }]} // Lebar tombol disesuaikan
+        style={styles.mobileButton}
         onPress={() => navigation.navigate("StudentLogin")}
       >
         <Text style={styles.buttonText}>Login Student</Text>
       </TouchableOpacity>
 
       {/* Footer */}
-      <Text style={[styles.footer, { bottom: height * 0.05 }]}>
-        UNIVERSITAS KLABAT
-      </Text>
+      <Text style={styles.footer}>UNIVERSITAS KLABAT</Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  mobileContainer: {
     flex: 1,
     backgroundColor: "#844E87",
     alignItems: "center",
     justifyContent: "center",
-    padding: 20,
+    paddingHorizontal: 20,
   },
-  logo: {
+  pcBackground: {
+    flex: 1,
+    resizeMode: "cover", // Menyesuaikan ukuran gambar
+  },
+  pcContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 40,
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Efek transparan untuk konten
+  },
+  mobileLogo: {
+    width: "70%",
+    height: "20%",
     resizeMode: "contain",
-    marginBottom: 10,
+    marginBottom: 15,
+  },
+  pcLogo: {
+    width: "50%",
+    height: "20%",
+    resizeMode: "contain",
+    marginBottom: 20,
   },
   titleContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 8,
   },
   line: {
     flex: 1,
@@ -93,39 +142,63 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "bold",
     color: "#fff",
+    textAlign: "center",
   },
   verse: {
     textAlign: "center",
     color: "#fff",
-    fontSize: 14,
-    marginBottom: 5,
+    fontSize: 13,
+    marginBottom: 2,
+    paddingHorizontal: 10,
   },
   verseRef: {
     color: "#fff",
     fontSize: 14,
-    marginBottom: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
   },
-  button: {
+  mobileButton: {
     backgroundColor: "#fff",
-    paddingVertical: 12,
+    paddingVertical: 10,
     borderRadius: 8,
     alignItems: "center",
+    marginVertical: 3,
+    width: "80%",
+  },
+  pcButton: {
+    backgroundColor: "#fff",
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
     marginVertical: 5,
+    width: 250,
   },
   buttonText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "bold",
     color: "#000",
   },
   footer: {
-    position: "absolute",
     color: "#fff",
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "bold",
+    marginTop: 15,
   },
+
+  pcVerse: {
+    textAlign: "center",
+    color: "#fff",
+    fontSize: 18,  // Ukuran teks lebih besar di PC
+    fontWeight: "500",
+    width: "80%",  // Batasi lebar agar tidak terlalu panjang
+    lineHeight: 30,  // Jarak antar baris agar lebih nyaman dibaca
+    marginBottom: 10,
+  },
+
+
 });
 
 export default HomeScreen;
