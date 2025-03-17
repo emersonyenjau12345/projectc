@@ -1,3 +1,4 @@
+import "react-native-url-polyfill/auto";
 import React from "react";
 import "./firebaseConfig"; // Pastikan file ini dipanggil lebih awal
 import { Text } from "react-native"; // Tambahkan ini untuk memastikan bisa digunakan
