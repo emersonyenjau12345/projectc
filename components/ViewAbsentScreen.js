@@ -93,7 +93,7 @@ const ViewAbsentScreen = () => {
           </View>
 
           <TouchableOpacity style={styles.statButton}>
-            <Text style={styles.statButtonText}>Statistik Poin Sabat</Text>
+            <Text style={styles.statButtonText}>Sabbath Points Statistics</Text>
           </TouchableOpacity>
 
           {loading ? (
@@ -105,14 +105,14 @@ const ViewAbsentScreen = () => {
               {/* Tampilkan data hanya jika ImageApproved === false */}
               {!profile.imageApproved && (
                 <View style={styles.dataBox}>
-                  <Text style={styles.dataLabel}>Total Jam Kerja</Text>
+                  <Text style={styles.dataLabel}>Total Working Hours</Text>
                   <Text style={styles.dataValue}>{profile.total_jam_kerja}</Text>
                 </View>
               )}
 
               {!profile.imageApproved && (
                 <View style={styles.dataBox}>
-                  <Text style={styles.dataLabel}>Total Poin</Text>
+                  <Text style={styles.dataLabel}>Total Points</Text>
                   <Text style={styles.dataValue}>{profile.total_poin}</Text>
                 </View>
               )}
@@ -120,21 +120,21 @@ const ViewAbsentScreen = () => {
               {/* Tambahkan status berdasarkan total poin */}
               {!profile.imageApproved && (
                 <View style={styles.dataBox}>
-                  <Text style={styles.dataLabel}>Keterangan Hukuman</Text>
+                  <Text style={styles.dataLabel}>Punishment Description</Text>
                   <Text style={styles.dataValue}>{profile.keterangan}</Text>
                 </View>
               )}
 
               {/* Status Persetujuan Gambar */}
               <View style={styles.dataBox}>
-                <Text style={styles.dataLabel}>Status Pendaftar Anda</Text>
+                <Text style={styles.dataLabel}>Your Registration Status</Text>
                 <Text
                   style={[
                     styles.dataValue,
                     { color: profile.imageApproved ? "green" : "red" },
                   ]}
                 >
-                  {profile.imageApproved ? "Disetujui ✅" : "Belum Disetujui ❌"}
+                  {profile.imageApproved ? "Approved ✅" : "Not Approved ❌"}
                 </Text>
               </View>
             </>

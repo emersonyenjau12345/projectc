@@ -82,7 +82,7 @@ const DashboardStudent = () => {
           }}
           style={styles.profileImage}
         />
-        <Text style={styles.welcomeText}>Selamat Datang</Text>
+        <Text style={styles.welcomeText}>WELCOME</Text>
         <Text style={styles.nameText}>{name}</Text>
         <Text style={styles.emailText}>Email: {email}</Text>
       </View>
@@ -101,7 +101,7 @@ const DashboardStudent = () => {
           onPress={() => navigation.navigate("ViewAbsentScreen", { email })}
         >
           <MaterialIcons name="assignment" size={30} color="black" />
-          <Text style={styles.menuText}>View Absent</Text>
+          <Text style={styles.menuText}>View Point</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -141,7 +141,7 @@ const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#B3E5FC",
+    backgroundColor: "	#9370DB",
     alignItems: "center",
   },
   profileContainer: {
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
   menuItem: {
     width: 120,
     height: 120,
-    backgroundColor: "#3F51B5",
+    backgroundColor: "#9400D3",
     margin: 10,
     justifyContent: "center",
     alignItems: "center",

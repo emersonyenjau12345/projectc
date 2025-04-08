@@ -80,7 +80,7 @@ const ProfileView = () => {
 
           <View style={styles.infoSection}>
             <View style={styles.infoBox}>
-              <Text style={styles.label}>Nama Lengkap</Text>
+              <Text style={styles.label}>Full Name</Text>
               <Text style={styles.value}>{profile.name}</Text>
             </View>
             <View style={styles.infoBox}>

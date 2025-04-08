@@ -25,7 +25,7 @@ const EditinPihakKerja = () => {
                     id: doc.id,
                     No: index + 1,
                     ...doc.data()
-                })).filter(user => user.Role !== 'Pihak Kerja' && user.Role !== 'Admin' && user.Name && user.Jam);
+                })).filter(user => user.Role !== 'Pihak Kerja' && user.Role !== 'Admin' && user.Name && user.Jam && user.Points > 0 && user.Points >= 1 && user.Points <= 28);
                 
                 setData(usersData);
                 setFilteredData(usersData);
@@ -53,7 +53,7 @@ const EditinPihakKerja = () => {
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.navButton}>
                     <FontAwesome name="arrow-left" size={24} color="white" />
                 </TouchableOpacity>
-                <Text style={styles.navTitle}>Daftar Pengguna</Text>
+                <Text style={styles.navTitle}>User List</Text>
                 <TouchableOpacity style={styles.navButton}>
                     <FontAwesome name="user-circle" size={24} color="white" />
                 </TouchableOpacity>
@@ -61,7 +61,7 @@ const EditinPihakKerja = () => {
 
             <TextInput
                 style={styles.searchInput}
-                placeholder="Cari berdasarkan nama atau poin..."
+                placeholder="Search by name or O'clock..."
                 value={searchQuery}
                 onChangeText={(query) => {
                     setSearchQuery(query);
@@ -82,16 +82,16 @@ const EditinPihakKerja = () => {
                 {/* Header Tabel */}
                 <View style={styles.headerRow}>
                     <Text style={[styles.headerCell, { width: 50 }]}>No</Text>
-                    <Text style={[styles.headerCell, { flex: 2 }]}>Nama</Text>
-                    <Text style={[styles.headerCell, { flex: 1 }]}>Jam</Text>
-                    <Text style={[styles.headerCell, { flex: 1 }]}>Aksi</Text>
+                    <Text style={[styles.headerCell, { flex: 2 }]}>Name</Text>
+                    <Text style={[styles.headerCell, { flex: 1 }]}>O'clock</Text>
+                    <Text style={[styles.headerCell, { flex: 1 }]}>Action</Text>
                 </View>
 
                 {/* Data Tabel */}
                 <FlatList
                     data={filteredData}
                     keyExtractor={(item) => item.id}
-                    ListEmptyComponent={<Text style={styles.errorText}>Tidak ada data pengguna yang sesuai dengan pencarian.</Text>}
+                    ListEmptyComponent={<Text style={styles.errorText}>No user data matches the search.</Text>}
                     renderItem={({ item }) => (
                         <View style={styles.tableRow}>
                             <Text style={[styles.tableCell, { width: 50 }]}>{item.No}</Text>

@@ -10,6 +10,18 @@ import { db } from '../firebaseConfig';
 
 const { width } = Dimensions.get('window');
 
+const getKeterangan = (points) => {
+  if (points >= 1 && points <= 28) {
+    return "Menghadap Sir Refly";
+  } else if (points >= 29 && points <= 49) {
+    return "Pemanggilan Orang Tua";
+  } else if (points >= 50) {
+    return "Diskors Semester Berikutnya";
+  } else {
+    return "Boleh Melakukan Pendaftaran";
+  }
+};
+
 const WorkLoginScreen = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,15 +39,15 @@ const WorkLoginScreen = () => {
 
         return {
           id: doc.id,
-          No: userData.No || '-',  // Nomor urut diambil dari database
+          No: userData.No || '-',
           Name: userData.Name || '-',
-          Tempat_Kerja: userData.Tempat_Kerja || '-',
+          Tempat_Kerja: getKeterangan(poin),
           Tempat_Duduk: userData.Seating || '-',
           Jumlah_Apsen: userData.Jumlah_Apsen || '0',
           Poin: poin,
         };
       });
-      const filteredData = usersData.filter((user) => user.Poin > 0);
+      const filteredData = usersData.filter((user) => user.Poin >= 1 && user.Poin <= 28);
       setData(filteredData);
     } catch (error) {
       console.error('Error mengambil data:', error);
@@ -61,7 +73,7 @@ const WorkLoginScreen = () => {
       <View style={styles.header}>
         <View style={styles.profileContainer}>
           <FontAwesome name="user-circle" size={80} color="#6200ea" />
-          <Text style={styles.profileText}>Daftar Mahasiswa</Text>
+          <Text style={styles.profileText}>Student List</Text>
         </View>
 
         <TouchableOpacity onPress={handleEditPress} style={styles.editButton}>
@@ -72,9 +84,9 @@ const WorkLoginScreen = () => {
       <View style={styles.table}>
         <View style={styles.headerRow}>
           <Text style={[styles.headerCell, { width: 40 }]}>No</Text>
-          <Text style={[styles.headerCell, { flex: 2 }]}>Nama</Text>
-          <Text style={[styles.headerCell, { flex: 2 }]}>Tempat Kerja</Text>
-          <Text style={[styles.headerCell, { flex: 1 }]}>Poin</Text>
+          <Text style={[styles.headerCell, { flex: 2 }]}>Name</Text>
+          <Text style={[styles.headerCell, { flex: 2 }]}>Workplace</Text>
+          <Text style={[styles.headerCell, { flex: 1 }]}>Points</Text>
         </View>
 
         <FlatList

@@ -13,14 +13,13 @@ import { useNavigation } from "@react-navigation/native";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
-  const { width, height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
   const isPC = Platform.OS === "web" && width > 800; // Deteksi platform PC
 
   return isPC ? (
     <ImageBackground
       source={require("../assets/pioneer_chapel.jpg")}
       style={styles.pcBackground}
-      imageStyle={{ opacity: 0.3 }} // Efek transparan pada gambar
     >
       <View style={styles.pcContainer}>
         {/* Logo */}
@@ -34,17 +33,14 @@ const HomeScreen = () => {
         </View>
 
         {/* Verse */}
-       <Text style={isPC ? styles.pcVerse : styles.verse}>
-       Janganlah kita menjauhkan diri dari ibadah,{"\n"}
-       tetapi marilah kita saling menasihati,{"\n"}
-       dan semakin giat melakukannya.
-       </Text>
+        <Text style={styles.pcVerse}>
+          Janganlah kita menjauhkan diri dari ibadah,{"\n"}
+          tetapi marilah kita saling menasihati,{"\n"}
+          dan semakin giat melakukannya.
+        </Text>
 
-       
         {/* Teks Ibrani 10:25 yang berfungsi sebagai tombol login Village Dean */}
-        <TouchableOpacity
-          onPress={() => navigation.navigate("VillageDeanLogin")}
-        >
+        <TouchableOpacity onPress={() => navigation.navigate("VillageDeanLogin")}>
           <Text style={styles.verseRef}>Ibrani 10:25</Text>
         </TouchableOpacity>
 
@@ -79,9 +75,7 @@ const HomeScreen = () => {
       </Text>
 
       {/* Teks Ibrani 10:25 yang berfungsi sebagai tombol login Village Dean */}
-      <TouchableOpacity
-        onPress={() => navigation.navigate("VillageDeanLogin")}
-      >
+      <TouchableOpacity onPress={() => navigation.navigate("VillageDeanLogin")}>
         <Text style={styles.verseRef}>Ibrani 10:25</Text>
       </TouchableOpacity>
 
@@ -109,14 +103,14 @@ const styles = StyleSheet.create({
   },
   pcBackground: {
     flex: 1,
-    resizeMode: "cover", // Menyesuaikan ukuran gambar
+    resizeMode: "cover",
   },
   pcContainer: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 40,
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Efek transparan untuk konten
+    backgroundColor: "transparent",
   },
   mobileLogo: {
     width: "70%",
@@ -187,18 +181,15 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginTop: 15,
   },
-
   pcVerse: {
     textAlign: "center",
     color: "#fff",
-    fontSize: 18,  // Ukuran teks lebih besar di PC
+    fontSize: 18,
     fontWeight: "500",
-    width: "80%",  // Batasi lebar agar tidak terlalu panjang
-    lineHeight: 30,  // Jarak antar baris agar lebih nyaman dibaca
+    width: "80%",
+    lineHeight: 30,
     marginBottom: 10,
   },
-
-
 });
 
 export default HomeScreen;

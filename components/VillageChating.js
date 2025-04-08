@@ -221,7 +221,16 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
     },
     username: { fontSize: 18, fontWeight: "bold", color: "#333", marginLeft: 10 },
-    notificationContainer: { padding: 10, backgroundColor: "#FFF", borderRadius: 10, marginVertical: 10 },
+    notificationContainer: { 
+        padding: 10, 
+        backgroundColor: "#FFF", 
+        borderRadius: 10, 
+        marginVertical: 10, 
+        width: 250, // Atur lebar yang lebih kecil
+        alignSelf: "flex-start", // Tetap di kiri
+        paddingHorizontal: 15,
+    },
+    
     notificationTitle: { fontSize: 16, fontWeight: "bold", marginBottom: 5 },
     notificationItem: { padding: 10, backgroundColor: "#E3E3E3", marginVertical: 5, borderRadius: 5 },
     notificationText: { fontSize: 14, color: "#333" },

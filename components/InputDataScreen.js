@@ -21,12 +21,14 @@ const InputDataScreen = () => {
   const [description, setDescription] = useState("");
   const [userData, setUserData] = useState(null);
   const [user, setUser] = useState(null);
+  const [userName, setUserName] = useState("Memuat...");
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
         await fetchUserData(currentUser.email);
+        await fetchUserName(currentUser.email);
       }
     });
     return () => unsubscribe();
@@ -46,9 +48,23 @@ const InputDataScreen = () => {
     }
   };
 
+  const fetchUserName = async (email) => {
+    try {
+      const userRef = doc(db, "Users", email);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        setUserName(userSnap.data().Name || "Nama tidak ditemukan");
+      } else {
+        setUserName("Nama tidak ditemukan");
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      setUserName("Gagal mengambil data");
+    }
+  };
+
   const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
+    let result = await ImagePicker.launchCameraAsync({
       allowsEditing: false,
       quality: 1,
     });
@@ -59,7 +75,7 @@ const InputDataScreen = () => {
 
   const uploadToCloudinary = async () => {
     if (!image || !user) {
-      Alert.alert("Error", "Silakan pilih gambar terlebih dahulu!");
+      Alert.alert("Error", "Silakan ambil gambar terlebih dahulu!");
       return;
     }
 
@@ -108,7 +124,7 @@ const InputDataScreen = () => {
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.headerText}>{user?.email || "User Tidak Ditemukan"}</Text>
+          <Text style={styles.headerText}>{userName}</Text>
         </View>
 
         <TouchableOpacity style={styles.uploadBox} onPress={pickImage}>
@@ -116,18 +132,18 @@ const InputDataScreen = () => {
             <Image source={{ uri: image }} style={styles.uploadedImage} />
           ) : (
             <>
-              <FontAwesome5 name="cloud-upload-alt" size={50} color="#555" />
-              <Text style={styles.uploadText}>Upload Gambar</Text>
+              <FontAwesome5 name="camera" size={50} color="#555" />
+              <Text style={styles.uploadText}>Ambil Gambar</Text>
             </>
           )}
         </TouchableOpacity>
 
         <TextInput
           style={styles.input}
-          placeholder="Tambahkan deskripsi"
+          placeholder="Description"
           placeholderTextColor="#888"
           value={description}
-          onChangeText={(text) => setDescription(text)} // Tanpa batasan karakter
+          onChangeText={(text) => setDescription(text)}
         />
 
         <TouchableOpacity style={styles.uploadButton} onPress={uploadToCloudinary}>
@@ -145,69 +161,69 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 20,
   },
-  container: { 
-    width: "90%", 
-    padding: 20, 
-    backgroundColor: "#f5f5f5", 
+  container: {
+    width: "90%",
+    padding: 20,
+    backgroundColor: "#f5f5f5",
     alignItems: "center",
     borderRadius: 10,
-    elevation: 3, 
+    elevation: 3,
   },
-  header: { 
-    marginBottom: 20, 
-    width: "100%", 
-    alignItems: "center" 
+  header: {
+    marginBottom: 20,
+    width: "100%",
+    alignItems: "center",
   },
-  headerText: { 
-    fontSize: 20, 
-    fontWeight: "bold", 
-    color: "#333" 
+  headerText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#333",
   },
-  uploadBox: { 
-    width: "100%", 
-    height: 200, 
-    backgroundColor: "#e0e0e0", 
-    justifyContent: "center", 
-    alignItems: "center", 
-    borderRadius: 10, 
-    borderWidth: 1, 
+  uploadBox: {
+    width: "100%",
+    height: 200,
+    backgroundColor: "#e0e0e0",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
+    borderWidth: 1,
     borderColor: "#ccc",
     marginBottom: 20,
   },
-  uploadText: { 
-    marginTop: 10, 
-    fontSize: 16, 
-    fontWeight: "bold", 
-    color: "#555" 
+  uploadText: {
+    marginTop: 10,
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#555",
   },
-  uploadedImage: { 
-    width: "100%", 
-    height: "100%", 
-    borderRadius: 10,
-    resizeMode: "contain", 
-  },
-  input: { 
+  uploadedImage: {
     width: "100%",
-    height: 50, 
-    borderColor: "#ddd", 
-    borderWidth: 1, 
-    borderRadius: 8, 
-    paddingHorizontal: 15, 
+    height: "100%",
+    borderRadius: 10,
+    resizeMode: "contain",
+  },
+  input: {
+    width: "100%",
+    height: 50,
+    borderColor: "#ddd",
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 15,
     backgroundColor: "#fff",
     fontSize: 16,
     marginBottom: 15,
   },
-  uploadButton: { 
-    backgroundColor: "#28a745", 
-    paddingVertical: 14, 
-    borderRadius: 8, 
+  uploadButton: {
+    backgroundColor: "#800080",
+    paddingVertical: 14,
+    borderRadius: 8,
     alignItems: "center",
     width: "100%",
   },
-  uploadButtonText: { 
-    fontSize: 16, 
-    fontWeight: "bold", 
-    color: "#fff" 
+  uploadButtonText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#fff",
   },
 });
 

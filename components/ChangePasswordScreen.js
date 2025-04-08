@@ -127,34 +127,33 @@ const ChangePasswordScreen = () => {
     <View style={styles.container}>
       <View style={styles.card}>
         <View style={styles.userContainer}>
-          <Icon name="user-circle" size={60} color="#3F51B5" />
+          <Icon name="user-circle" size={60} color="#EE82EE" />
           <Text style={styles.userName}>{displayName}</Text>
-          <Text style={styles.userEmail}>{email}</Text>
         </View>
 
         <TextInput
           style={styles.input}
-          placeholder="Kata Sandi Lama"
+          placeholder="Old Password"
           secureTextEntry
           value={oldPassword}
           onChangeText={setOldPassword}
         />
         <TextInput
           style={styles.input}
-          placeholder="Kata Sandi Baru"
+          placeholder="New Password"
           secureTextEntry
           value={newPassword}
           onChangeText={setNewPassword}
         />
         <TextInput
           style={styles.input}
-          placeholder="Konfirmasi Kata Sandi Baru"
+          placeholder="Confirm New Password"
           secureTextEntry
           value={confirmPassword}
           onChangeText={setConfirmPassword}
         />
         <TouchableOpacity style={styles.button} onPress={handleChangePassword}>
-          <Text style={styles.buttonText}>Ubah Kata Sandi</Text>
+          <Text style={styles.buttonText}>Change Password</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -203,7 +202,7 @@ const styles = StyleSheet.create({
     borderColor: "#DDD",
   },
   button: {
-    backgroundColor: "#3F51B5",
+    backgroundColor: "#800080",
     padding: 15,
     borderRadius: 5,
     alignItems: "center",

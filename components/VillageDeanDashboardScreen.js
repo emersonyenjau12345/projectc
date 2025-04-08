@@ -1,3 +1,4 @@
+
 // VillageDeanDashboardScreen.js
 import React, { useState, useEffect } from "react";
 import {
@@ -8,6 +9,7 @@ import {
   TextInput,
   FlatList,
   Image,
+  ScrollView,
   Linking,
 } from "react-native";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
@@ -81,16 +83,14 @@ const VillageDeanDashboardScreen = () => {
 
   const approveImage = async (id, email) => {
     try {
-        console.log("Mencari pengguna dengan email:", email); // Debugging
+        console.log("Mencari pengguna dengan email:", email);
 
         const usersCollection = collection(db, "Users");
         const userSnapshot = await getDocs(usersCollection);
-        
-        // Debugging: Menampilkan semua user yang diambil dari Firestore
+
         const allUsers = userSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
         console.log("Semua user yang ditemukan:", allUsers);
 
-        // Mencari user berdasarkan email
         const userData = allUsers.find((user) => user.Email.toLowerCase() === email.toLowerCase());
 
         if (!userData) {
@@ -108,31 +108,84 @@ const VillageDeanDashboardScreen = () => {
             return;
         }
 
-        // Update Firestore
+        // Pastikan ImageApproved tetap true setelah disetujui
         const userRef = doc(db, "Users", userData.id);
         await updateDoc(userRef, { ImageApproved: true });
 
-        // Perbarui state lokal
         setUsers(users.map(user =>
             user.id === userData.id ? { ...user, ImageApproved: true } : user
         ));
 
         alert("Gambar Disetujui!");
+
+        // Panggil approvePoints untuk memperbarui poin dan status
+        approvePoints(userData.id, parseInt(userData.Points, 10), userData.imageUrl);
+
     } catch (error) {
         console.error("Error approving image:", error);
     }
 };
 
-  
-  const handleSave = async (id) => {
-    const updatedUser  = editedData[id];
-    if (updatedUser ) {
-      await updateDoc(doc(db, "Users", id), updatedUser );
-      setUsers(users.map((user) => (user.id === id ? { ...user, ...updatedUser  } : user)));
-      setEditedData({ ...editedData, [id]: {} });
-      alert("Data Updated!");
+const approvePoints = async (id, points, imageUrl) => {
+  try {
+    const userRef = doc(db, "Users", id);
+    
+    // Ambil data lama sebelum update
+    const userSnapshot = await getDoc(userRef);
+    const oldUserData = userSnapshot.data();
+
+    if (!oldUserData) return;
+
+    // Periksa perubahan poin dan gambar
+    const pointsChanged = oldUserData.Points !== points;
+    const imageChanged = oldUserData.imageUrl !== imageUrl;
+    const imageDeleted = !imageUrl || imageUrl.trim() === ""; // Jika gambar dihapus
+
+    // Status ImageApproved hanya berubah ke false jika poin atau gambar berubah/hilang
+    const imageApproved = (pointsChanged || imageChanged || imageDeleted) ? false : oldUserData.ImageApproved;
+
+    await updateDoc(userRef, {
+      Points: points,
+      ImageApproved: imageApproved, 
+    });
+
+    // Update state lokal agar tampilan diperbarui tanpa reload
+    setFilteredUsers(prevUsers =>
+      prevUsers.map(user =>
+        user.id === id ? { ...user, Points: points, ImageApproved: imageApproved } : user
+      )
+    );
+
+    console.log("Data berhasil diperbarui di Firestore.");
+  } catch (error) {
+    console.error("Gagal memperbarui data di Firestore:", error);
+  }
+};
+
+const handleSave = async (id) => {
+    const updatedUser = editedData[id];
+    if (updatedUser) {
+        // Ambil data lama sebelum diupdate
+        const oldUserData = users.find(user => user.id === id);
+        
+        // Periksa apakah poin atau gambar berubah/hilang
+        const pointsChanged = oldUserData.Points !== parseInt(updatedUser.Points, 10);
+        const imageChanged = oldUserData.imageUrl !== updatedUser.imageUrl;
+        const imageDeleted = !updatedUser.imageUrl || updatedUser.imageUrl.trim() === "";
+
+        await updateDoc(doc(db, "Users", id), {
+            ...updatedUser,
+            // Jika poin atau gambar berubah/hilang, reset persetujuan gambar
+            ImageApproved: (pointsChanged || imageChanged || imageDeleted) ? false : oldUserData.ImageApproved,
+        });
+
+        setUsers(users.map((user) => (user.id === id ? { ...user, ...updatedUser } : user)));
+        setEditedData({ ...editedData, [id]: {} });
+
+        alert("Data Updated!");
     }
-  };
+};
+
   
   const handleCancel = (id) => {
     const originalUser  = users.find((user) => user.id === id);
@@ -171,13 +224,13 @@ const VillageDeanDashboardScreen = () => {
           <TouchableOpacity onPress={() => Linking.openURL("https://www.unklab.ac.id/visi-misi-tujuan/")}>
             <Text style={styles.navLink}>Visi & Misi</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => Linking.openURL("https://www.unklab.ac.id/contact/")}>
+          <TouchableOpacity onPress={() => Linking.openURL("https://www.unklab.ac.id/counter/")}>
             <Text style={styles.navLink}>Contact Us</Text>
           </TouchableOpacity>
         </View>
         <TextInput
           style={styles.searchInput}
-          placeholder="Cari berdasarkan nama..."
+          placeholder="Search by name..."
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
@@ -214,17 +267,18 @@ const VillageDeanDashboardScreen = () => {
     {/* Keterangan Tabel */}
     <View style={styles.tableHeader}>
       <Text style={styles.headerCell}>No</Text>
-      <Text style={styles.headerCell}>Nama</Text>
+      <Text style={styles.headerCell}>Name</Text>
       <Text style={styles.headerCell}>NIM</Text>
       <Text style={styles.headerCell}>Regis</Text>
       <Text style={styles.headerCell}>Seating</Text>
-      <Text style={styles.headerCell}>Keterangan Hukuman</Text>
-      <Text style={styles.headerCell}>Poin</Text>
-      <Text style={styles.headerCell}>Keterangan</Text>
+      <Text style={styles.headerCell}>Punishment Description</Text>
+      <Text style={styles.headerCell}>points</Text>
+      <Text style={styles.headerCell}>Registration status information</Text>
 
     </View>
 
     {/* Data Tabel */}
+    <ScrollView style={styles.tableBody}>
     <FlatList
   data={filteredUsers}
   keyExtractor={(item) => item.id}
@@ -244,29 +298,32 @@ const VillageDeanDashboardScreen = () => {
     );
   }}
 />;
+</ScrollView>
   </View>
 )}
+
+
 {activeTab === "approvePoints" && (
   <View>
-    {/* Keterangan Header Tabel */}
     <View style={styles.tableHeader}>
       <Text style={[styles.headerCell, { paddingHorizontal: 40 }]}>No</Text>
-      <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Nama</Text>
+      <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Name</Text>
       <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Nim</Text>
-      <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Jam Kerja</Text>
-      <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Poin Mahasiswa</Text>
-      <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Keterangan</Text>
-      <Text style={[styles.headerCell, { paddingHorizontal: 10 }]}>Aksi</Text>
+      <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Working hours</Text>
+      <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Student Points</Text>
+      <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Description caption</Text>
+      <Text style={[styles.headerCell, { paddingHorizontal: 10 }]}>Action</Text>
     </View>
 
-    {/* Data Tabel */}
-    <FlatList
-      data={filteredUsers}
-      keyExtractor={(item) => item.id}
-      renderItem={({ item }) => {
-        const points = parseInt(item.Points) || 0;
+    <ScrollView style={styles.tableBody}>
+      <FlatList
+        data={filteredUsers}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => {
+          const points = parseInt(item.Points) || 0;
+          const hasImage = item.imageUrl && item.imageUrl.trim() !== "";
 
-        // Split description by spaces to create word array
+         // Split description by spaces to create word array
         const descriptionWords = item.description ? item.description.split(' ') : [];
 
         // Split into chunks of 20 words
@@ -275,54 +332,53 @@ const VillageDeanDashboardScreen = () => {
           descriptionChunks.push(descriptionWords.slice(i, i + 15).join(' '));
         }
 
-        return (
-          <View style={styles.tableRow}>
-            <Text style={styles.tableCell}>{item.No}</Text>
-            <Text style={styles.tableCell}>{item.Name}</Text>
-            <Text style={styles.tableCell}>{item.Nim}</Text>
-            <Text style={styles.tableCell}>{item.Jam}</Text>
-            <Text style={styles.tableCell}>{points}</Text>
 
-            {/* Menampilkan keterangan dengan pemisahan otomatis setiap 20 kata */}
+          return (
+            <View style={styles.tableRow}>
+              <Text style={styles.tableCell}>{item.No}</Text>
+              <Text style={styles.tableCell}>{item.Name}</Text>
+              <Text style={styles.tableCell}>{item.Nim}</Text>
+              <Text style={styles.tableCell}>{item.Jam}</Text>
+              <Text style={styles.tableCell}>{points}</Text>
+
+               {/* Menampilkan keterangan dengan pemisahan otomatis setiap 20 kata */}
             <View style={styles.tableCell}>
               {descriptionChunks.map((chunk, index) => (
                 <Text key={index}>{chunk}</Text>
               ))}
-
               
             </View>
 
-            <View style={styles.iconContainer}>
-              <TouchableOpacity onPress={() => approvePoints(item.id, points)}>
-                <FontAwesome5
-                  name={points === 0 ? "check-circle" : "times-circle"}
-                  size={20}
-                  color={points === 0 ? "green" : "red"}
-                />
-              </TouchableOpacity>
+              <View style={styles.iconContainer}>
+                <TouchableOpacity onPress={() => approvePoints(item.id, points, item.imageUrl)}>
+                  <FontAwesome5
+                    name={points === 0 ? "check-circle" : "times-circle"}
+                    size={20}
+                    color={points === 0 ? "green" : "red"}
+                  />
+                </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => openImage(item.imageUrl)}>
+                <TouchableOpacity onPress={() => openImage(item.imageUrl)}>
                 <FontAwesome5 name="image" size={20} color="blue" />
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => {
-    console.log("Icon jempol ditekan untuk ID:", item.id);
-    approveImage(item.id, item.Email);
-}}>
-    <FontAwesome5
-        name="thumbs-up"
-        size={20}
-        color={item.ImageApproved ? "green" : "gray"}
-    />
-</TouchableOpacity>
 
+                <TouchableOpacity onPress={() => approveImage(item.id, item.Email)}>
+                  <FontAwesome5
+                    name="thumbs-up"
+                    size={20}
+                    color={item.ImageApproved && points === 0 && hasImage ? "green" : "gray"}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        );
-      }}
-    />
+          );
+        }}
+      />
+    </ScrollView>
   </View>
 )}
+
 
 
 {activeTab === "editPoints" && (
@@ -330,15 +386,16 @@ const VillageDeanDashboardScreen = () => {
     {/* Keterangan Header Tabel */}
     <View style={styles.tableHeader}>
       <Text style={[styles.headerCell, { flex: 1.5 }]}>No</Text>
-      <Text style={[styles.headerCell, { flex: 1.5 }]}>Nama</Text>
+      <Text style={[styles.headerCell, { flex: 1.5 }]}>Name</Text>
       <Text style={[styles.headerCell, { flex: 1.5 }]}>NIM</Text>
       <Text style={[styles.headerCell, { flex: 1.5 }]}>Regis</Text>
-      <Text style={[styles.headerCell, { flex: 1.5 }]}>Jam Kerja</Text>
-      <Text style={[styles.headerCell, { flex: 1.5 }]}>Poin</Text>
-      <Text style={[styles.headerCell, { flex: 1.5 }]}>Aksi</Text>
+      <Text style={[styles.headerCell, { flex: 1.5 }]}>Working hours</Text>
+      <Text style={[styles.headerCell, { flex: 1.5 }]}>Points</Text>
+      <Text style={[styles.headerCell, { flex: 1.5 }]}>Action</Text>
     </View>
 
     {/* Data Tabel */}
+    <ScrollView style={styles.tableBody}>
     <FlatList
       data={filteredUsers}
       keyExtractor={(item) => item.id}
@@ -377,6 +434,7 @@ const VillageDeanDashboardScreen = () => {
         </View>
       )}
     />
+    </ScrollView>
   </View>
 )}
 
@@ -390,7 +448,7 @@ const VillageDeanDashboardScreen = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F5F5F5" },
   navbar: {
-    backgroundColor: "#1976D2",
+    backgroundColor: "#800080",
     padding: 15,
     flexDirection: "row",
     justifyContent: "space-between",
@@ -408,8 +466,8 @@ const styles = StyleSheet.create({
   },
   mainContent: { flex: 1, flexDirection: "row" },
   sidebar: {
-    width: 220,
-    backgroundColor: "#263238",
+    width: 200,
+    backgroundColor: "#EE82EE",
     padding: 15,
   },
   sidebarTitle: {
@@ -421,7 +479,7 @@ const styles = StyleSheet.create({
   sidebarItem: {
     fontSize: 14,
     marginVertical: 8,
-    color: "#B0BEC5",
+    color: "#000000",
     paddingVertical: 10,
   },
   content: { flex: 1, padding: 15 },
@@ -461,7 +519,7 @@ const styles = StyleSheet.create({
   },
   tableHeader: {
     flexDirection: "row",
-    backgroundColor: "#DCDCDC",
+    backgroundColor: "#D8BFD8",
     paddingVertical: 10,
     borderRadius: 8,
     marginBottom: 5,
@@ -474,6 +532,10 @@ const styles = StyleSheet.create({
     color: "#FFF",
     textAlign: "center",
   },
+
+  tableBody: { maxHeight: 420 }, // Hanya tabel yang bisa di-scroll
+tableRow: { flexDirection: "row", padding: 10, borderBottomWidth: 1, borderColor: "#ddd" },
+tableCell: { flex: 1, color: "#333", textAlign: "center" },
 
 });
 
