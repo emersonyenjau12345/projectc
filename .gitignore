@@ -37,3 +37,4 @@ yarn-error.*
 
 # Local Netlify folder
 .netlify
+serviceAccountKey.json 
