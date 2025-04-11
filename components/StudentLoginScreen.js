@@ -33,13 +33,13 @@ const StudentLoginScreen = () => {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Error", "Email dan Password harus diisi!");
+      Alert.alert("Error", "Email and Password must be filled in!");
       return;
     }
 
     // Cek apakah email masuk dalam daftar yang dilarang
     if (blockedEmails.includes(email.toLowerCase())) {
-      Alert.alert("Login Failed", "Anda tidak memiliki akses ke sistem ini!");
+      Alert.alert("Login Failed", "You do not have access to this system!");
       return;
     }
 
@@ -55,16 +55,15 @@ const StudentLoginScreen = () => {
 
       if (!querySnapshot.empty) {
         const userData = querySnapshot.docs[0].data();
-        Alert.alert("Success", "Login berhasil!");
         navigation.replace("DashboardStudent", { email: userData.Email });
       } else {
-        Alert.alert("Login Failed", "Email tidak terdaftar dalam sistem!");
+        Alert.alert("Login Failed", "Email is not registered in the system!");
       }
     } catch (error) {
-      let errorMessage = "Terjadi kesalahan saat login.";
-      if (error.code === "auth/user-not-found") errorMessage = "Email tidak terdaftar!";
+      let errorMessage = "Wrong password.";
+      if (error.code === "auth/user-not-found") errorMessage = "Email not registered!";
       else if (error.code === "auth/wrong-password") errorMessage = "Password salah!";
-      else if (error.code === "auth/invalid-email") errorMessage = "Format email tidak valid!";
+      else if (error.code === "auth/invalid-email") errorMessage = "Invalid email format!";
       Alert.alert("Login Failed", errorMessage);
     }
   };

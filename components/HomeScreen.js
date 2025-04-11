@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -8,13 +8,48 @@ import {
   StyleSheet,
   useWindowDimensions,
   Platform,
+  Animated,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+
 
 const HomeScreen = () => {
   const navigation = useNavigation();
   const { width } = useWindowDimensions();
   const isPC = Platform.OS === "web" && width > 800; // Deteksi platform PC
+
+
+  const scrollAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const loopAnimation = () => {
+      scrollAnim.setValue(-200); // mulai dari kiri luar container
+      Animated.timing(scrollAnim, {
+        toValue: 300, // geser ke kanan luar container
+        duration: 5000, // lebih cepat karena jaraknya pendek
+        useNativeDriver: true,
+      }).start(() => loopAnimation());
+    };
+  
+    if (isPC) loopAnimation();
+  }, []);
+
+
+  useEffect(() => {
+    const loopAnimation = () => {
+      scrollAnim.setValue(-150); // mulai dari luar kiri
+      Animated.timing(scrollAnim, {
+        toValue: 150, // berhenti di kanan dalam container
+        duration: 5000,
+        useNativeDriver: true,
+      }).start(() => loopAnimation());
+    };
+  
+    loopAnimation(); // dijalankan untuk mobile juga
+  }, []);
+  
+  
+
 
   return isPC ? (
     <ImageBackground
@@ -22,74 +57,89 @@ const HomeScreen = () => {
       style={styles.pcBackground}
     >
       <View style={styles.pcContainer}>
-        {/* Logo */}
-        <Image source={require("../assets/logo.png")} style={styles.pcLogo} />
+        <View style={styles.contentWrapper}>
+          <Image source={require("../assets/logo.png")} style={styles.pcLogo} />
+  
+          <View style={styles.titleContainer}>
+            <View style={styles.line} />
+            <Text style={styles.title}>REDEEM POINT</Text>
+            <View style={styles.line} />
+          </View>
 
-        {/* Title Section */}
-        <View style={styles.titleContainer}>
-          <View style={styles.line} />
-          <Text style={styles.title}>REDEEM POINT</Text>
-          <View style={styles.line} />
+          <Text style={styles.verse}>
+        Janganlah kita menjauhkan diri dari ibadah,{"\n"} tetapi marilah kita saling
+        menasihati, {"\n"}dan semakin giat melakukannya.{"\n"}
+        "Ibrani 10:25"
+      </Text>
+         
+  
+          <TouchableOpacity
+            style={styles.pcButton}
+            onPress={() => navigation.navigate("VillageDeanLogin")}
+          >
+            <Text style={styles.buttonText}>Login Village Dean</Text>
+          </TouchableOpacity>
+          {/* Animated Footer hanya untuk PC */}
+<View style={styles.footerContainer}>
+  <Animated.Text
+    style={[
+      styles.footer,
+      {
+        transform: [{ translateX: scrollAnim }],
+      },
+    ]}
+  >
+    UNIVERSITAS KLABAT
+  </Animated.Text>
+</View>
+
+
         </View>
-
-        {/* Verse */}
-        <Text style={styles.pcVerse}>
-          Janganlah kita menjauhkan diri dari ibadah,{"\n"}
-          tetapi marilah kita saling menasihati,{"\n"}
-          dan semakin giat melakukannya.
-        </Text>
-
-        {/* Teks Ibrani 10:25 yang berfungsi sebagai tombol login Village Dean */}
-        <TouchableOpacity onPress={() => navigation.navigate("VillageDeanLogin")}>
-          <Text style={styles.verseRef}>Ibrani 10:25</Text>
-        </TouchableOpacity>
-
-        {/* Login Student Button */}
-        <TouchableOpacity
-          style={styles.pcButton}
-          onPress={() => navigation.navigate("StudentLogin")}
-        >
-          <Text style={styles.buttonText}>Login Student</Text>
-        </TouchableOpacity>
-
-        {/* Footer */}
-        <Text style={styles.footer}>UNIVERSITAS KLABAT</Text>
       </View>
     </ImageBackground>
   ) : (
     <View style={styles.mobileContainer}>
-      {/* Logo */}
-      <Image source={require("../assets/logo.png")} style={styles.mobileLogo} />
+  {/* Logo */}
+  <Image source={require("../assets/logo.png")} style={styles.mobileLogo} />
 
-      {/* Title Section */}
-      <View style={styles.titleContainer}>
-        <View style={styles.line} />
-        <Text style={styles.title}>REDEEM POINT</Text>
-        <View style={styles.line} />
-      </View>
+  {/* Title Section */}
+  <View style={styles.titleContainer}>
+    <View style={styles.line} />
+    <Text style={styles.title}>REDEEM POINT</Text>
+    <View style={styles.line} />
+  </View>
 
-      {/* Verse */}
-      <Text style={styles.verse}>
-        "Janganlah kita menjauhkan diri dari ibadah, tetapi marilah kita saling
-        menasihati, dan semakin giat melakukannya."
-      </Text>
+  {/* Verse */}
+  <Text style={styles.verse}>
+    "Janganlah kita menjauhkan diri dari ibadah, tetapi marilah kita saling
+    menasihati, dan semakin giat melakukannya."{"\n"}
+    Ibrani 10:25
+  </Text>
 
-      {/* Teks Ibrani 10:25 yang berfungsi sebagai tombol login Village Dean */}
-      <TouchableOpacity onPress={() => navigation.navigate("VillageDeanLogin")}>
-        <Text style={styles.verseRef}>Ibrani 10:25</Text>
-      </TouchableOpacity>
+  {/* Login Student Button */}
+  <TouchableOpacity
+    style={styles.mobileButton}
+    onPress={() => navigation.navigate("StudentLogin")}
+  >
+    <Text style={styles.buttonText}>Login Student</Text>
+  </TouchableOpacity>
 
-      {/* Login Student Button */}
-      <TouchableOpacity
-        style={styles.mobileButton}
-        onPress={() => navigation.navigate("StudentLogin")}
-      >
-        <Text style={styles.buttonText}>Login Student</Text>
-      </TouchableOpacity>
+  {/* Footer Animated */}
+  <Animated.Text
+    style={[
+      styles.footer,
+      {
+        transform: [{ translateX: scrollAnim }],
+        position: "absolute",
+        bottom: 180,
+        left: -60,
+      },
+    ]}
+  >
+    UNIVERSITAS KLABAT
+  </Animated.Text>
+</View>
 
-      {/* Footer */}
-      <Text style={styles.footer}>UNIVERSITAS KLABAT</Text>
-    </View>
   );
 };
 
@@ -104,14 +154,16 @@ const styles = StyleSheet.create({
   pcBackground: {
     flex: 1,
     resizeMode: "cover",
+    backgroundColor: "rgba(0,0,0,0.3)", // Tambahkan ini untuk efek transparansi di atas gambar background
   },
+
   pcContainer: {
     flex: 1,
-    alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 40,
-    backgroundColor: "transparent",
+    alignItems: "center",
+    padding: 30,
   },
+  
   mobileLogo: {
     width: "70%",
     height: "20%",
@@ -119,8 +171,8 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   pcLogo: {
-    width: "50%",
-    height: "20%",
+    width: "70%",
+    height: "40%",
     resizeMode: "contain",
     marginBottom: 20,
   },
@@ -190,6 +242,34 @@ const styles = StyleSheet.create({
     lineHeight: 30,
     marginBottom: 10,
   },
+  // Tambahkan style baru ini
+  contentWrapper: {
+    backgroundColor: "rgba(240, 153, 228, 0.6)", // semi-transparan container utama
+    padding: 50,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  footerContainer: {
+    width: 250, // bisa kamu ubah sesuai panjang container
+    height: 30,
+    overflow: "hidden",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 20,
+    backgroundColor: "rgba(0,0,0,0.2)", // opsional
+    borderRadius: 10,
+  },
+  footer: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+    width: 500, // panjang teks agar animasi terasa
+  },
+  
+  
+
 });
 
 export default HomeScreen;

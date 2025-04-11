@@ -16,6 +16,7 @@ import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { db } from "../firebaseConfig"; // Pastikan ini adalah konfigurasi Firebase Anda
 import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
 import { useNavigation } from '@react-navigation/native';
+
 const VillageDeanDashboardScreen = () => {
   const navigation = useNavigation();
   const [users, setUsers] = useState([]);
@@ -212,67 +213,94 @@ const handleSave = async (id) => {
     }
   };
   
-
-  return (
-    <View style={styles.container}>
-      <View style={styles.navbar}>
-        <View style={styles.navbarLeft}>
-          <Image source={require("../assets/logo.png")} style={styles.logo} />
-          <Text style={styles.navbarTitle}>Redeem Points System</Text>
-        </View>
-        <View style={styles.navLinks}>
-          <TouchableOpacity onPress={() => Linking.openURL("https://www.unklab.ac.id/visi-misi-tujuan/")}>
-            <Text style={styles.navLink}>Visi & Misi</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => Linking.openURL("https://www.unklab.ac.id/counter/")}>
-            <Text style={styles.navLink}>Contact Us</Text>
-          </TouchableOpacity>
-        </View>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search by name..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
+// Di dalam komponen
+return (
+  <View style={styles.container}>
+    <View style={styles.navbar}>
+      <View style={styles.navbarLeft}>
+        <Image source={require("../assets/logo.png")} style={styles.logo} />
+        <Text style={styles.navbarTitle}>Redeem Point System</Text>
       </View>
+
+      <View style={styles.navLinks}>
+        <TouchableOpacity onPress={() => Linking.openURL("https://www.unklab.ac.id/visi-misi-tujuan/")}>
+          <Text style={styles.navLink}>Visi & Misi</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => Linking.openURL("https://www.unklab.ac.id/counter/")}>
+          <Text style={styles.navLink}>Contact Us</Text>
+        </TouchableOpacity>
+      </View>
+
+     
+      {/* Search input */}
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Search by name..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+      />
+    </View>
 
       <View style={styles.mainContent}>
         <View style={styles.sidebar}>
-          <Text style={styles.sidebarTitle}>Redeem Points</Text>
+          <Text style={styles.sidebarTitle}>Redeem Point</Text>
+
           <TouchableOpacity onPress={() => setActiveTab("editPoints")}>
-            <Text style={styles.sidebarItem}>Edit Points</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setActiveTab("viewPoints")}>
-            <Text style={styles.sidebarItem}>View Points</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setActiveTab("approvePoints")}>
-            <Text style={styles.sidebarItem}>Approve Points</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('VillageChating')}>
-             <Text style={styles.sidebarItem}>Messe</Text>
-          </TouchableOpacity>
+  <Text style={[
+    styles.sidebarItem,
+    activeTab === "editPoints" && styles.activeSidebarItem
+  ]}>
+    Edit Student Point
+  </Text>
+</TouchableOpacity>
+
+<TouchableOpacity onPress={() => setActiveTab("viewPoints")}>
+  <Text style={[
+    styles.sidebarItem,
+    activeTab === "viewPoints" && styles.activeSidebarItem
+  ]}>
+    View Student Point
+  </Text>
+</TouchableOpacity>
+
+<TouchableOpacity onPress={() => setActiveTab("approvePoints")}>
+  <Text style={[
+    styles.sidebarItem,
+    activeTab === "approvePoints" && styles.activeSidebarItem
+  ]}>
+    Approve Student Point
+  </Text>
+</TouchableOpacity>
+
+<TouchableOpacity onPress={() => navigation.navigate('VillageChating')}>
+  <Text style={styles.sidebarItem}>Chat Student</Text>
+</TouchableOpacity>
+
+
+          <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate("AddStudentScreen")}
+            >
+          <Text style={styles.addButtonText}>Add Student</Text> </TouchableOpacity>
         </View>
 
         <View style={styles.content}>
           <Text style={styles.sectionTitle}>
             {activeTab === "editPoints"
-              ? "EDIT POINTS"
+              ? "EDIT POINT"
               : activeTab === "approvePoints"
-              ? "APPROVE POINTS"
-              : "VIEW POINTS"}
+              ? "APPROVE POINT"
+              : "VIEW POINT"}
           </Text>
 
           {activeTab === "viewPoints" && (
   <View>
     {/* Keterangan Tabel */}
     <View style={styles.tableHeader}>
-      <Text style={styles.headerCell}>No</Text>
       <Text style={styles.headerCell}>Name</Text>
       <Text style={styles.headerCell}>NIM</Text>
       <Text style={styles.headerCell}>Regis</Text>
       <Text style={styles.headerCell}>Seating</Text>
       <Text style={styles.headerCell}>Punishment Description</Text>
-      <Text style={styles.headerCell}>points</Text>
+      <Text style={styles.headerCell}>point</Text>
       <Text style={styles.headerCell}>Registration status information</Text>
 
     </View>
@@ -286,7 +314,11 @@ const handleSave = async (id) => {
     const points = parseInt(item.Points) || 0;
     return (
       <View style={styles.tableRow}>
-        <Text style={styles.tableCell}>{item.No}</Text>
+        {/* Ganti kolom No dengan icon user */}
+        <View style={styles.iconCell}>
+        <FontAwesome5 name="user" size={20} color="rgb(107, 40, 104)" />
+
+        </View>
         <Text style={styles.tableCell}>{item.Name}</Text>
         <Text style={styles.tableCell}>{item.Nim}</Text>
         <Text style={styles.tableCell}>{item.Regis}</Text>
@@ -297,7 +329,8 @@ const handleSave = async (id) => {
       </View>
     );
   }}
-/>;
+/>
+
 </ScrollView>
   </View>
 )}
@@ -306,11 +339,10 @@ const handleSave = async (id) => {
 {activeTab === "approvePoints" && (
   <View>
     <View style={styles.tableHeader}>
-      <Text style={[styles.headerCell, { paddingHorizontal: 40 }]}>No</Text>
       <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Name</Text>
       <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Nim</Text>
       <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Working hours</Text>
-      <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Student Points</Text>
+      <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Student Point</Text>
       <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Description caption</Text>
       <Text style={[styles.headerCell, { paddingHorizontal: 10 }]}>Action</Text>
     </View>
@@ -334,8 +366,13 @@ const handleSave = async (id) => {
 
 
           return (
+            
             <View style={styles.tableRow}>
-              <Text style={styles.tableCell}>{item.No}</Text>
+        {/* Ganti kolom No dengan icon user */}
+        <View style={styles.iconCell}>
+        <FontAwesome5 name="user" size={20} color="rgb(119, 49, 102)" />
+
+        </View>
               <Text style={styles.tableCell}>{item.Name}</Text>
               <Text style={styles.tableCell}>{item.Nim}</Text>
               <Text style={styles.tableCell}>{item.Jam}</Text>
@@ -359,17 +396,24 @@ const handleSave = async (id) => {
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => openImage(item.imageUrl)}>
-                <FontAwesome5 name="image" size={20} color="blue" />
-              </TouchableOpacity>
+  <FontAwesome5
+    name="image"
+    size={20}
+    color={item.imageUrl ? "green" : "blue"}
+  />
+</TouchableOpacity>
+
+<TouchableOpacity onPress={() => approveImage(item.id, item.Email)}>
+  <FontAwesome5
+    name="thumbs-up"
+    size={20}
+    color={item.ImageApproved && points === 0 && hasImage ? "green" : "gray"}
+  />
+</TouchableOpacity>
 
 
-                <TouchableOpacity onPress={() => approveImage(item.id, item.Email)}>
-                  <FontAwesome5
-                    name="thumbs-up"
-                    size={20}
-                    color={item.ImageApproved && points === 0 && hasImage ? "green" : "gray"}
-                  />
-                </TouchableOpacity>
+
+                
               </View>
             </View>
           );
@@ -385,12 +429,11 @@ const handleSave = async (id) => {
   <View>
     {/* Keterangan Header Tabel */}
     <View style={styles.tableHeader}>
-      <Text style={[styles.headerCell, { flex: 1.5 }]}>No</Text>
       <Text style={[styles.headerCell, { flex: 1.5 }]}>Name</Text>
       <Text style={[styles.headerCell, { flex: 1.5 }]}>NIM</Text>
       <Text style={[styles.headerCell, { flex: 1.5 }]}>Regis</Text>
       <Text style={[styles.headerCell, { flex: 1.5 }]}>Working hours</Text>
-      <Text style={[styles.headerCell, { flex: 1.5 }]}>Points</Text>
+      <Text style={[styles.headerCell, { flex: 1.5 }]}>Point</Text>
       <Text style={[styles.headerCell, { flex: 1.5 }]}>Action</Text>
     </View>
 
@@ -401,7 +444,11 @@ const handleSave = async (id) => {
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => (
         <View style={styles.tableRow}>
-          <Text style={styles.tableCell}>{item.No}</Text>
+        {/* Ganti kolom No dengan icon user */}
+        <View style={styles.iconCell}>
+        <FontAwesome5 name="user" size={20} color="rgb(133, 55, 116)" />
+
+        </View>
           <Text style={styles.tableCell}>{item.Name}</Text>
           <Text style={styles.tableCell}>{item.Nim}</Text>
           <Text style={styles.tableCell}>{item.Regis}</Text>
@@ -537,6 +584,31 @@ const styles = StyleSheet.create({
 tableRow: { flexDirection: "row", padding: 10, borderBottomWidth: 1, borderColor: "#ddd" },
 tableCell: { flex: 1, color: "#333", textAlign: "center" },
 
+addButton: {
+  paddingVertical: 8,
+  paddingHorizontal: 5,
+  borderRadius: 5,
+  marginRight: 5,
+  marginBottom: 900, // 👈 ini buat nambah jarak ke bawah
+},
+
+activeSidebarItem: {
+  backgroundColor: '#6C63FF',
+  color: 'white',
+  paddingVertical: 5,
+  paddingHorizontal: 5,
+  borderRadius: 5,
+},
+iconCell: {
+  width: 40, // atau sesuai kebutuhan
+  justifyContent: 'center',
+  alignItems: 'center',
+  padding: 5,
+},
+
+
+
 });
+
 
 export default VillageDeanDashboardScreen;

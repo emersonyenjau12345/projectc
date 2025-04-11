@@ -23,6 +23,7 @@
     "cloudinary": "^2.5.1",
     "expo": "~52.0.0",
     "expo-camera": "~16.0.18",
+    "expo-document-picker": "~13.0.3",
     "expo-image-manipulator": "~13.0.6",
     "expo-image-picker": "^16.0.6",
     "expo-location": "~18.0.8",
@@ -45,7 +46,8 @@
     "react-native-view-shot": "^4.0.3",
     "react-native-web": "~0.19.13",
     "react-native-webview": "^13.13.5",
-    "react-router-dom": "^7.3.0"
+    "react-router-dom": "^7.3.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

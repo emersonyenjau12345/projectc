@@ -21,6 +21,7 @@ const firebaseConfig = {
   appId: "1:226840353263:web:b5cd2f26efd5ebfae3fe1a"
 };
 
+
 // Cek apakah Firebase sudah diinisialisasi sebelumnya
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 

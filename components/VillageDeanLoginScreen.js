@@ -98,7 +98,6 @@ const VillageDeanLoginScreen = () => {
               onValueChange={(itemValue) => setRole(itemValue)}
             >
               <Picker.Item label="Village Dean" value="Village Dean" />
-              <Picker.Item label="Pihak Kerja" value="Pihak Kerja" />
             </Picker>
           </View>
 
@@ -195,7 +194,7 @@ const styles = StyleSheet.create({
   
   picker: {
     flex: 1,
-    height: 55,
+    height: 40,
     borderWidth: 0,
     borderColor: "transparent",
     outlineStyle: "none", // Hilangkan garis saat fokus di web
