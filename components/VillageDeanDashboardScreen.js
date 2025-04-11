@@ -339,7 +339,7 @@ return (
 {activeTab === "approvePoints" && (
   <View>
     <View style={styles.tableHeader}>
-      <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Name</Text>
+      <Text style={[styles.headerCell, { paddingHorizontal: 40 }]}>Name</Text>
       <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Nim</Text>
       <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Working hours</Text>
       <Text style={[styles.headerCell, { paddingHorizontal: 20 }]}>Student Point</Text>
@@ -432,8 +432,8 @@ return (
       <Text style={[styles.headerCell, { flex: 1.5 }]}>Name</Text>
       <Text style={[styles.headerCell, { flex: 1.5 }]}>NIM</Text>
       <Text style={[styles.headerCell, { flex: 1.5 }]}>Regis</Text>
-      <Text style={[styles.headerCell, { flex: 1.5 }]}>Working hours</Text>
-      <Text style={[styles.headerCell, { flex: 1.5 }]}>Point</Text>
+      <Text style={[styles.headerCell, { flex: 1.3 }]}>Working hours</Text>
+      <Text style={[styles.headerCell, { flex: 1.3}]}>Point</Text>
       <Text style={[styles.headerCell, { flex: 1.5 }]}>Action</Text>
     </View>
 
