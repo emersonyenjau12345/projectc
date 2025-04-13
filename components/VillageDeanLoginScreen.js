@@ -10,10 +10,8 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
-import { Picker } from "@react-native-picker/picker";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { getFirestore, doc, updateDoc, getDoc } from "firebase/firestore";
-import VillageDeanDashboardScreen from "./VillageDeanDashboardScreen";
 
 const VillageDeanLoginScreen = () => {
   const navigation = useNavigation();
@@ -92,14 +90,15 @@ const VillageDeanLoginScreen = () => {
           </Text>
 
           <View style={styles.inputContainer}>
-            <Picker
-              selectedValue={role}
-              style={styles.picker}
-              onValueChange={(itemValue) => setRole(itemValue)}
-            >
-              <Picker.Item label="Village Dean" value="Village Dean" />
-            </Picker>
-          </View>
+       <TextInput
+         value="Village Dean"
+         editable={false}
+         style={styles.disabledInput}
+       />
+       </View>
+
+
+
 
           <View style={styles.inputContainer}>
             <FontAwesome5 name="user-alt" size={20} color="#C96DD8" style={styles.icon} />
@@ -224,6 +223,14 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#fff",
   },
+  disabledInput: {
+    fontSize: 17,
+    color: '#555',
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+  },  
+  
 });
 
 export default VillageDeanLoginScreen;

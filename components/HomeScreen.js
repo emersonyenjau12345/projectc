@@ -33,23 +33,7 @@ const HomeScreen = () => {
   
     if (isPC) loopAnimation();
   }, []);
-
-
-  useEffect(() => {
-    const loopAnimation = () => {
-      scrollAnim.setValue(-150); // mulai dari luar kiri
-      Animated.timing(scrollAnim, {
-        toValue: 150, // berhenti di kanan dalam container
-        duration: 5000,
-        useNativeDriver: true,
-      }).start(() => loopAnimation());
-    };
   
-    loopAnimation(); // dijalankan untuk mobile juga
-  }, []);
-  
-  
-
 
   return isPC ? (
     <ImageBackground

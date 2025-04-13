@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Text,
   TextInput,
@@ -6,9 +6,10 @@ import {
   StyleSheet,
   ScrollView,
   View,
-  KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
+  Animated,
+  ImageBackground,
 } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import * as XLSX from 'xlsx';
@@ -16,7 +17,7 @@ import { doc, setDoc } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { db, auth } from '../firebaseConfig';
 import { useNavigation } from '@react-navigation/native';
-import { FontAwesome, Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 
 const AddStudentScreen = () => {
   const [nama, setNama] = useState('');
@@ -29,6 +30,44 @@ const AddStudentScreen = () => {
   const [messageType, setMessageType] = useState('');
   const navigation = useNavigation();
 
+  const MovingText = () => {
+    const translateX = useRef(new Animated.Value(-300)).current;
+
+    useEffect(() => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(translateX, {
+            toValue: 300,
+            duration: 6000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(translateX, {
+            toValue: -300,
+            duration: 0,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    }, []);
+
+    return (
+      <View style={{ width: '100%', height: 30, overflow: 'hidden', justifyContent: 'center' }}>
+        <Animated.Text
+          style={{
+            position: 'absolute',
+            transform: [{ translateX }],
+            fontSize: 18,
+            fontWeight: 'bold',
+            color: '#fff',
+            alignSelf: 'center',
+          }}
+        >
+        Register New Student
+        </Animated.Text>
+      </View>
+    );
+  };
+
   const showMessage = (text, type = 'error') => {
     setMessage(text);
     setMessageType(type);
@@ -40,7 +79,7 @@ const AddStudentScreen = () => {
 
   const handleAddStudent = async () => {
     if (!nama || !nim || !regis || !seating || !point || !email) {
-      showMessage('Semua data harus diisi!', 'error');
+      showMessage('All data must be filled in!', 'error');
       return;
     }
 
@@ -48,95 +87,83 @@ const AddStudentScreen = () => {
       const password = '123456';
       const lowerEmail = email.toLowerCase();
       const docRef = doc(db, 'Users', lowerEmail);
-
       const pointsNumber = parseInt(point);
       const jamKerja = Math.floor(pointsNumber / 2);
 
-      await setDoc(
-        docRef,
-        {
-          AuthUID: '',
-          Name: nama,
-          Nim: Number(nim),
-          Regis: regis,
-          Seating: seating,
-          Points: point,
-          Email: lowerEmail,
-          Password: password,
-          Jam: jamKerja,
-          ImageApproved: false,
-        },
-        { merge: true }
-      );
+      await setDoc(docRef, {
+        AuthUID: '',
+        Name: nama,
+        Nim: Number(nim),
+        Regis: regis,
+        Seating: seating,
+        Points: point,
+        Email: lowerEmail,
+        Password: password,
+        Jam: jamKerja,
+        ImageApproved: false,
+      }, { merge: true });
 
       const userCredential = await createUserWithEmailAndPassword(auth, lowerEmail, password);
       const uid = userCredential.user.uid;
+
       await setDoc(docRef, { AuthUID: uid }, { merge: true });
 
-      showMessage('Data mahasiswa berhasil ditambahkan!', 'success');
-      setNama('');
-      setNim('');
-      setRegis('');
-      setSeating('');
-      setPoint('');
-      setEmail('');
+      showMessage('Student data successfully added!', 'success');
+      setNama(''); setNim(''); setRegis(''); setSeating(''); setPoint(''); setEmail('');
     } catch (error) {
       if (error.code === 'auth/email-already-in-use') {
-        showMessage('Email sudah terdaftar. Data tetap diperbarui.', 'success');
         try {
-          // Optional: Login logic if needed
-        } catch (loginError) {
-          showMessage('Login Gagal: ' + loginError.message, 'error');
+          const userCredential = await signInWithEmailAndPassword(auth, lowerEmail, password);
+          const uid = userCredential.user.uid;
+          await setDoc(docRef, { AuthUID: uid }, { merge: true });
+          showMessage('Email is already registered. Data is still updated.', 'success');
+        } catch (signInError) {
+          showMessage('Failed to login to existing account: ' + signInError.message, 'error');
         }
-      } else {
-        showMessage('Error: ' + error.message, 'error');
       }
     }
   };
 
   const handleFileUpload = async () => {
     try {
-      const res = await DocumentPicker.getDocumentAsync({
-        type: '*/*',
-        copyToCacheDirectory: true,
-      });
+      const res = await DocumentPicker.getDocumentAsync({ type: '*/*', copyToCacheDirectory: true });
       if (res.canceled || !res.assets || res.assets.length === 0) {
-        showMessage('Tidak ada file yang dipilih.', 'error');
+        showMessage('No file selected.', 'error');
         return;
       }
+
       const fileUri = res.assets[0].uri;
       const response = await fetch(fileUri);
       const blob = await response.blob();
       const reader = new FileReader();
+
       reader.onload = async (e) => {
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: 'array' });
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
         for (const row of jsonData) {
           const email = (row.Email || '').toLowerCase();
           const password = '123456';
           const docRef = doc(db, 'Users', email);
-          try {
-            const pointVal = parseInt(row.Poin || 0);
-            const jamKerja = Math.floor(pointVal / 2);
+          const pointVal = parseInt(row.Point || 0);
+          const jamKerja = Math.floor(pointVal / 2);
 
-            await setDoc(
-              docRef,
-              {
-                AuthUID: '',
-                Name: row.Nama || '',
-                Nim: Number(row.Nim) || 0,
-                Regis: row.Regis || '',
-                Seating: row['Tempat Duduk'] || '',
-                Points: row.Poin || '0',
-                Email: email,
-                Password: password,
-                Jam: jamKerja,
-                ImageApproved: false,
-              },
-              { merge: true }
-            );
+          try {
+            await setDoc(docRef, {
+              AuthUID: '',
+              Name: row.Name || '',
+              Nim: Number(row.Nim) || 0,
+              Regis: row.Regis || '',
+              Seating: row['Seating'] || '',
+              Points: row.Point || '0',
+              Email: email,
+              Password: password,
+              Jam: jamKerja,
+              ImageApproved: false,
+            }, { merge: true });
+
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const uid = userCredential.user.uid;
             await setDoc(docRef, { AuthUID: uid }, { merge: true });
@@ -144,12 +171,14 @@ const AddStudentScreen = () => {
             if (error.code === 'auth/email-already-in-use') {
               await signInWithEmailAndPassword(auth, email, password);
             } else {
-              console.error('Gagal mengunggah baris data:', row, error.message);
+              console.error('Upload failed:', row, error.message);
             }
           }
         }
-        showMessage('File berhasil diunggah & data siswa ditambahkan!', 'success');
+
+        showMessage('File successfully uploaded & student data added!', 'success');
       };
+
       reader.readAsArrayBuffer(blob);
     } catch (err) {
       showMessage('Gagal memilih file: ' + err.message, 'error');
@@ -157,17 +186,33 @@ const AddStudentScreen = () => {
   };
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <ImageBackground
+      source={require('../assets/gambar1.jpg')}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.navbar}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.navBackButton}>
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+        <View style={{ flex: 1, alignItems: 'center' }}>
+          <MovingText />
+        </View>
+      </View>
+
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.formContainer}>
-          {/* Back button */}
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={20} color="#6C63FF" />
-            <Text style={styles.backText}></Text>
-          </TouchableOpacity>
-
-          <FontAwesome name="user-circle" size={50} color="#6C63FF" style={{ marginBottom: 5 }} />
-          <Text style={styles.title}>Tambah / Edit Siswa</Text>
+        <View style={{ alignItems: 'center', marginBottom: 20 }}>
+  <Ionicons name="person-circle-outline" size={60} color="#800080" />
+  <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#800080', marginTop: 5 }}>
+    Add Student
+  </Text>
+  
+  <TouchableOpacity onPress={handleFileUpload} style={{ padding: 8 }}>
+    <Ionicons name="cloud-upload-outline" size={28} color="#800080" />
+    <Text style={{ fontSize: 12, color: '#800080', textAlign: 'center' }}>Import</Text>
+  </TouchableOpacity>
+</View>
 
           {message ? (
             <View style={[styles.messageBox, messageType === 'success' ? styles.successBox : styles.errorBox]}>
@@ -175,85 +220,58 @@ const AddStudentScreen = () => {
             </View>
           ) : null}
 
-          <TextInput style={styles.input} placeholder="Nama" value={nama} onChangeText={setNama} />
-          <TextInput style={styles.input} placeholder="NIM" value={nim} onChangeText={setNim} keyboardType="numeric" />
-          <TextInput style={styles.input} placeholder="Regis" value={regis} onChangeText={setRegis} />
+          <TextInput style={styles.input} placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
+          <TextInput style={styles.input} placeholder="Full name" value={nama} onChangeText={setNama} />
+          <TextInput style={styles.input} placeholder="Nim" value={nim} onChangeText={setNim} keyboardType="numeric" />
+          <TextInput style={styles.input} placeholder="Registration Number" value={regis} onChangeText={setRegis} />
           <TextInput style={styles.input} placeholder="Seating" value={seating} onChangeText={setSeating} />
           <TextInput style={styles.input} placeholder="Point" value={point} onChangeText={setPoint} keyboardType="numeric" />
-          <TextInput style={styles.input} placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
 
-          <View style={styles.buttonContainer}>
-            <Button title="Simpan Mahasiswa" onPress={handleAddStudent} color="#6C63FF" />
-          </View>
-
-          <TouchableOpacity style={styles.uploadButton} onPress={handleFileUpload}>
-            <Ionicons name="cloud-upload-outline" size={20} color="white" />
-            <Text style={styles.uploadText}>Unggah Excel (.xlsx)</Text>
-          </TouchableOpacity>
+          <TouchableOpacity style={styles.customButton} onPress={handleAddStudent}>
+  <Text style={styles.buttonText}>Save Student</Text>
+</TouchableOpacity>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+  },
   container: {
     flexGrow: 1,
     justifyContent: 'center',
-    backgroundColor: '#F9F9F9',
-    padding: 10,
+    paddingVertical: 30,
+    paddingHorizontal: 10,
   },
   formContainer: {
-    backgroundColor: '#fff',
-    padding: 20,
+    backgroundColor: '#ffffff',
     borderRadius: 12,
-    alignItems: 'center',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 5 },
-    width: '90%',
-    maxWidth: 450,
+    padding: 25,
+    width: '100%',
+    maxWidth: 500,
     alignSelf: 'center',
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start', // agar button rata kiri
-    marginBottom: 10,
-    marginTop: 5,  
-  },
-  backText: {
-    color: '#6C63FF',
-    fontWeight: 'bold',
-    marginLeft: 5,
-  },
-  title: {
-    fontSize: 20,
-    marginVertical: 10,
-    fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
   },
   input: {
-    width: '100%',
     borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 10,
-    backgroundColor: '#F5F5F5',
+    borderColor: '#ddd',
+    backgroundColor: '#FAFAFA',
+    padding: 12,
+    borderRadius: 10,
     fontSize: 14,
+    marginBottom: 12,
   },
   buttonContainer: {
-    marginTop: 10,
-    marginBottom: 15,
-    alignSelf: 'center',
-    width: '100%',
+    marginVertical: 15,
   },
   messageBox: {
-    width: '100%',
     padding: 10,
     borderRadius: 8,
     marginBottom: 10,
@@ -265,27 +283,57 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8d7da',
   },
   messageText: {
-    color: '#333',
-    textAlign: 'center',
     fontSize: 13,
+    textAlign: 'center',
+    color: '#333',
   },
   uploadButton: {
     flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#007AFF',
+    backgroundColor: '#800080',
     paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 8,
+    paddingHorizontal: 20,
+    borderRadius: 10,
     justifyContent: 'center',
-    alignSelf: 'center',
-    width: '100%',
+    alignItems: 'center',
   },
   uploadText: {
-    color: 'white',
+    color: '#fff',
     fontWeight: 'bold',
     marginLeft: 8,
     fontSize: 14,
   },
+  navbar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgb(204, 87, 204)',
+    paddingHorizontal: 15,
+    paddingTop: Platform.OS === 'ios' ? 50 : 20,
+    paddingBottom: 15,
+  },
+  navBackButton: {
+    paddingRight: 10,
+    paddingLeft: 5,
+  },
+
+  customButton: {
+    backgroundColor: '#800080',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+    alignSelf: 'center',
+    marginTop: 10,
+    width: '60%', // Perkecil ukuran tombol
+  },
+  
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  }
+  
+  
 });
 
 export default AddStudentScreen;
